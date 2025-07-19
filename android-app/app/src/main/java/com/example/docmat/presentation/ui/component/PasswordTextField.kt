@@ -25,7 +25,8 @@ fun PasswordTextField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    enabled: Boolean = true
 ) {
     var isPasswordVisible by remember { mutableStateOf(false) }
 
@@ -34,7 +35,7 @@ fun PasswordTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = modifier.fillMaxWidth(),
-            placeholder = { Text("Enter your password") },
+            placeholder = { Text("Masukkan password") },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Lock,
@@ -53,12 +54,13 @@ fun PasswordTextField(
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             isError = isError,
             singleLine = true,
+            enabled = enabled,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
                 imeAction = ImeAction.Done
             )
         )
-        if (isError && !errorMessage.isNullOrEmpty()) {
+        if (isError && errorMessage != null) {
             Text(
                 text = errorMessage,
                 color = MaterialTheme.colorScheme.error,
