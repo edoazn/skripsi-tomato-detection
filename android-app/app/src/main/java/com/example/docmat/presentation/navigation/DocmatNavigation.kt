@@ -103,8 +103,7 @@ fun DocmatNavigation(
             // Login Route
             composable(DocmatScreens.Login.route) {
                 LoginScreen(
-                    isLoading = false,
-                    onLoginSuccess = { email, password ->
+                    onLoginSuccess = {
                         // Handle login success
                         navController.navigate(DocmatScreens.Home.route)
                     },
@@ -117,8 +116,7 @@ fun DocmatNavigation(
             // Register Route
             composable(DocmatScreens.Register.route) {
                 RegisterScreen(
-                    isLoading = false,
-                    onRegisterSuccess = { name, email, password ->
+                    onRegisterSuccess = {
                         // Handle register success
                         navController.navigate(DocmatScreens.Home.route)
                     },

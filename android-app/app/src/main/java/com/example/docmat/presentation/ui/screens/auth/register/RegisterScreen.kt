@@ -15,11 +15,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -30,6 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.docmat.R
 import com.example.docmat.presentation.ui.component.EmailTextField
 import com.example.docmat.presentation.ui.component.NameTextField
@@ -37,9 +44,9 @@ import com.example.docmat.presentation.ui.component.PasswordTextField
 
 @Composable
 fun RegisterScreen(
-    onRegisterSuccess: (String, String, String) -> Unit,
+    onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    isLoading: Boolean = false
+    viewModel: RegisterViewModel = viewModel()
 ) {
     var name by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
@@ -49,8 +56,28 @@ fun RegisterScreen(
     var emailError by rememberSaveable { mutableStateOf<String?>(null) }
     var passwordError by rememberSaveable { mutableStateOf<String?>(null) }
     var confirmPasswordError by rememberSaveable { mutableStateOf<String?>(null) }
-
+    val uiState by viewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Handle register success
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            snackbarHostState.showSnackbar("Pendaftaran berhasil. Silakan login.")
+            onRegisterSuccess()
+        }
+    }
+
+    // Handle error
+    uiState.errorMessage?.let { errorMessage ->
+        LaunchedEffect(errorMessage) {
+            snackbarHostState.showSnackbar(
+                message = errorMessage,
+                withDismissAction = true
+            )
+            viewModel.clearError()
+        }
+    }
 
 
     // logic validation most be in custom text field
@@ -96,145 +123,150 @@ fun RegisterScreen(
 
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Header Section
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(bottom = 32.dp)
-        ) {
-            Text(
-                text = "Daftar Akun",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Buat akun baru untuk memulai",
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        // Image Section
-        Image(
-            painter = painterResource(id = R.drawable.dimasjid_layo),
-            contentDescription = "register image",
             modifier = Modifier
-                .size(180.dp)
-                .clip(MaterialTheme.shapes.medium),
-            contentScale = ContentScale.Crop
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Form Section
-        Column(
-            modifier = Modifier.fillMaxSize()
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            NameTextField(
-                value = name,
-                onValueChange = {
-                    name = it
-                    nameError = null
-                },
-                modifier = Modifier.fillMaxWidth(),
-                isError = nameError != null,
-                errorMessage = nameError,
-                enabled = !isLoading
-            )
+            // Header Section
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = "Daftar Akun",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.primary
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-            EmailTextField(
-                value = email,
-                onValueChange = {
-                    email = it
-                    emailError = null
-                },
-                modifier = Modifier.fillMaxWidth(),
-                isError = emailError != null,
-                errorMessage = emailError,
-                enabled = !isLoading
-            )
+                Text(
+                    text = "Buat akun baru untuk memulai",
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            PasswordTextField(
-                value = password,
-                onValueChange = {
-                    password = it
-                    passwordError = null
-                },
-                modifier = Modifier.fillMaxWidth(),
-                isError = passwordError != null,
-                errorMessage = passwordError,
-                enabled = !isLoading
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            PasswordTextField(
-                value = confirmPassword,
-                onValueChange = {
-                    confirmPassword = it
-                    confirmPasswordError = null
-                },
-                modifier = Modifier.fillMaxWidth(),
-                isError = confirmPasswordError != null,
-                errorMessage = confirmPasswordError,
-                enabled = !isLoading
+            // Image Section
+            Image(
+                painter = painterResource(id = R.drawable.dimasjid_layo),
+                contentDescription = "register image",
+                modifier = Modifier
+                    .size(180.dp)
+                    .clip(MaterialTheme.shapes.medium),
+                contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Register Button
-            Button(
-                onClick = {
-                    if (validateInputs()) {
-                        onRegisterSuccess(name, email, password)
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                enabled = !isLoading && name.isNotBlank() && email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank(),
+            // Form Section
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                NameTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it
+                        nameError = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = nameError != null,
+                    errorMessage = nameError,
+                    enabled = !uiState.isLoading
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                EmailTextField(
+                    value = email,
+                    onValueChange = {
+                        email = it
+                        emailError = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = emailError != null,
+                    errorMessage = emailError,
+                    enabled = !uiState.isLoading
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                PasswordTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        passwordError = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = passwordError != null,
+                    errorMessage = passwordError,
+                    enabled = !uiState.isLoading
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                PasswordTextField(
+                    value = confirmPassword,
+                    onValueChange = {
+                        confirmPassword = it
+                        confirmPasswordError = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = confirmPasswordError != null,
+                    errorMessage = confirmPasswordError,
+                    enabled = !uiState.isLoading
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Register Button
+                Button(
+                    onClick = {
+                        if (validateInputs()) {
+                            viewModel.registerUser(name, email, password)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    enabled = !uiState.isLoading && name.isNotBlank() && email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank(),
                 ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                } else {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text(
+                            text = "Daftar",
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Login Navigation
+                TextButton(
+                    onClick = onNavigateToLogin,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(
-                        text = "Daftar",
-                        style = MaterialTheme.typography.labelLarge,
+                        text = "Sudah punya akun? Masuk",
+                        style = MaterialTheme.typography.bodyLarge,
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Login Navigation
-            TextButton(
-                onClick = onNavigateToLogin,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Sudah punya akun? Masuk",
-                    style = MaterialTheme.typography.bodyLarge,
-                )
             }
         }
     }
