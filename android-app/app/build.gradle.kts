@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.material.icons.extended.android)
 
     // Compose BOM & UI
     implementation(platform(libs.androidx.compose.bom))
@@ -77,6 +78,7 @@ dependencies {
     // Dependency Injection
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     kapt(libs.hilt.compiler)
 
     // Networking

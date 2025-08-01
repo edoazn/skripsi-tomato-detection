@@ -12,11 +12,13 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -27,12 +29,14 @@ import com.example.docmat.R
 import com.example.docmat.R.drawable.ic_news
 import com.example.docmat.presentation.ui.screens.auth.login.LoginScreen
 import com.example.docmat.presentation.ui.screens.auth.register.RegisterScreen
+import com.example.docmat.presentation.ui.screens.auth.register.RegisterViewModel
 import com.example.docmat.presentation.ui.screens.camera.CameraScreen
 import com.example.docmat.presentation.ui.screens.history.HistoryScreen
 import com.example.docmat.presentation.ui.screens.history.HistoryViewModel
 import com.example.docmat.presentation.ui.screens.homescreen.HomeScreen
 import com.example.docmat.presentation.ui.screens.homescreen.HomeViewModel
 import com.example.docmat.presentation.ui.screens.settings.SettingsScreen
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun DocmatNavigation(
@@ -95,17 +99,29 @@ fun DocmatNavigation(
             }
         }
     ) { paddingValues ->
+
+        val startDest =
+            if (FirebaseAuth.getInstance().currentUser != null)
+                DocmatScreens.Home.route
+            else
+                DocmatScreens.Login.route
+
+
         NavHost(
             navController = navController,
-            startDestination = DocmatScreens.Login.route,
+            startDestination = startDest,
             modifier = Modifier.padding(paddingValues)
         ) {
             // Login Route
             composable(DocmatScreens.Login.route) {
                 LoginScreen(
                     onLoginSuccess = {
-                        // Handle login success
-                        navController.navigate(DocmatScreens.Home.route)
+                        navController.navigate(DocmatScreens.Home.route) {
+                            popUpTo(DocmatScreens.Login.route) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
                     },
                     onNavigateToRegister = {
                         navController.navigate(DocmatScreens.Register.route)
@@ -115,11 +131,11 @@ fun DocmatNavigation(
 
             // Register Route
             composable(DocmatScreens.Register.route) {
+                val vm: RegisterViewModel = hiltViewModel()
                 RegisterScreen(
-                    onRegisterSuccess = {
-                        // Handle register success
-                        navController.navigate(DocmatScreens.Home.route)
-                    },
+                    viewModel = vm,
+                    onEvent = vm::onEvent,
+                    onRegisterSuccess = { navController.popBackStack() },
                     onNavigateToLogin = {
                         navController.navigate(DocmatScreens.Login.route)
                     }

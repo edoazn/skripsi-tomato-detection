@@ -11,7 +11,9 @@ import com.example.docmat.presentation.navigation.DocmatNavigation
 import com.example.docmat.presentation.theme.DocmatTheme
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

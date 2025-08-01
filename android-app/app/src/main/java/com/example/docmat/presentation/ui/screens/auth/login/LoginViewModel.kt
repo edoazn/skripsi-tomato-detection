@@ -1,89 +1,113 @@
 package com.example.docmat.presentation.ui.screens.auth.login
 
-import android.util.Log
+import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.FirebaseException
+import com.example.docmat.LoginEvent
+import com.example.docmat.LoginState
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-
-data class LoginUiState(
-    val isLoading: Boolean = false,
-    val isSuccess: Boolean = false,
-    val errorMessage: String? = null
-)
-
 
 class LoginViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
 
-    private val _uiState = MutableStateFlow(LoginUiState())
-    val uiState: StateFlow<LoginUiState> = _uiState
+    private val _state = MutableStateFlow(LoginState())
+    val state: StateFlow<LoginState> = _state.asStateFlow()
 
-    fun loginUser(email: String, password: String) {
-        viewModelScope.launch {
-            _uiState.value = LoginUiState(isLoading = true, errorMessage = null)
+    // form validate
+    val isFormValid: StateFlow<Boolean> = _state.map { s ->
+        s.email.isNotBlank() && s.password.isNotBlank()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = false
+    )
 
+    fun onEvent(event: LoginEvent) {
+        when (event) {
+            is LoginEvent.EmailChanged -> _state.update {
+                val emailError = if (!Patterns.EMAIL_ADDRESS.matcher(event.value).matches()) {
+                    "Format email tidak valid"
+                } else null
+
+                it.copy(email = event.value, emailError = emailError)
+            }
+
+            is LoginEvent.PasswordChanged -> _state.update {
+                val passwordError = if (event.value.length < 6) {
+                    "Password minimal 6 karakter"
+                } else null
+
+                it.copy(password = event.value, passwordError = passwordError)
+            }
+
+            LoginEvent.Submit -> login()
+            LoginEvent.ErrorShown -> {
+                _state.update {
+                    it.copy(errorMessage = null)
+                }
+
+            }
+        }
+    }
+
+    private fun login() = viewModelScope.launch {
+        val s = _state.value
+        val emailErr = if (s.email.isBlank()) "Email tidak boleh kosong"
+        else if (!Patterns.EMAIL_ADDRESS.matcher(s.email)
+                .matches()
+        ) "Format email tidak valid" else null
+        val passwordErr = if (s.password.isBlank()) "Password tidak boleh kosong"
+        else if (s.password.length < 6) "Password minimal 6 karakter" else null
+
+        if (listOf(emailErr, passwordErr).all { it == null }) {
+            _state.update { it.copy(isLoading = true) }
             try {
-                Log.d("LoginViewModel", "Starting login for: $email")
-
-                val result = auth.signInWithEmailAndPassword(email, password).await()
-
-                Log.d("LoginViewModel", "Login successful for: ${result.user?.uid}")
-
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    isSuccess = true
-                )
-
+                auth.signInWithEmailAndPassword(s.email, s.password).await()
+                _state.update { it.copy(isLoading = false, isSuccess = true) }
             } catch (e: Exception) {
-                Log.e("LoginViewModel", "Login failed", e)
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    errorMessage = getErrorMessage(e)
+                _state.update { it.copy(isLoading = false, errorMessage = getErrorMessage(e)) }
+            }
+        } else {
+            // Tampilkan error validasi sebagai snackbar
+            val validationError = listOfNotNull(emailErr, passwordErr).firstOrNull()
+                ?: "Mohon lengkapi form dengan benar."
+            _state.update {
+                it.copy(
+                    emailError = emailErr,
+                    passwordError = passwordErr,
+                    errorMessage = validationError
                 )
             }
         }
     }
 
     private fun getErrorMessage(exception: Exception): String {
-        Log.d("LoginViewModel", "Error: ${exception.message}")
-
         return when (exception) {
             is FirebaseAuthException -> {
                 when (exception.errorCode) {
-                    "ERROR_INVALID_EMAIL" -> "Format email tidak valid"
-                    "ERROR_USER_NOT_FOUND" -> "Email tidak terdaftar"
-                    "ERROR_WRONG_PASSWORD" -> "Password salah"
-                    "ERROR_USER_DISABLED" -> "Akun telah dinonaktifkan"
-                    "ERROR_TOO_MANY_REQUESTS" -> "Terlalu banyak percobaan. Coba lagi nanti"
-                    "ERROR_NETWORK_REQUEST_FAILED" -> "Koneksi internet bermasalah"
-                    else -> "Login gagal: ${exception.message}"
+                    "ERROR_EMAIL_ALREADY_IN_USE" -> "Email sudah digunakan oleh akun lain."
+                    "ERROR_INVALID_EMAIL" -> "Format email tidak valid."
+                    "ERROR_WEAK_PASSWORD" -> "Password terlalu lemah. Minimal 6 karakter."
+                    "ERROR_USER_DISABLED" -> "Akun telah dinonaktifkan."
+                    "ERROR_TOO_MANY_REQUESTS" -> "Terlalu banyak percobaan. Coba lagi nanti."
+                    "ERROR_NETWORK_REQUEST_FAILED" -> "Koneksi internet bermasalah."
+                    "ERROR_INVALID_CREDENTIAL" -> "Email atau password salah."
+                    else -> "Terjadi kesalahan: ${exception.message}"
                 }
             }
 
-            is FirebaseException -> {
-                when {
-                    exception.message?.contains("API key not valid") == true ->
-                        "Konfigurasi aplikasi bermasalah. Hubungi developer"
-
-                    exception.message?.contains("network") == true ->
-                        "Koneksi internet bermasalah"
-
-                    else -> "Login gagal. Silakan coba lagi"
-                }
-            }
-
-            else -> "Login gagal. Silakan coba lagi"
+            else -> "Terjadi kesalahan. Silakan coba lagi."
         }
-    }
-
-    fun clearError() {
-        _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 }
 

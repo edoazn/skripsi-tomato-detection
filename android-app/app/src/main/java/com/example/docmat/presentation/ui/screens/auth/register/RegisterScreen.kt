@@ -1,6 +1,5 @@
 package com.example.docmat.presentation.ui.screens.auth.register
 
-import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -22,12 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,106 +29,57 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.docmat.R
+import com.example.docmat.RegisterEvent
 import com.example.docmat.presentation.ui.component.EmailTextField
+import com.example.docmat.presentation.ui.component.GradientButton
 import com.example.docmat.presentation.ui.component.NameTextField
 import com.example.docmat.presentation.ui.component.PasswordTextField
 
 @Composable
 fun RegisterScreen(
+    viewModel: RegisterViewModel,
+    onEvent: (RegisterEvent) -> Unit,
     onRegisterSuccess: () -> Unit,
-    onNavigateToLogin: () -> Unit,
-    viewModel: RegisterViewModel = viewModel()
+    onNavigateToLogin: () -> Unit
 ) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-    var confirmPassword by rememberSaveable { mutableStateOf("") }
-    var nameError by rememberSaveable { mutableStateOf<String?>(null) }
-    var emailError by rememberSaveable { mutableStateOf<String?>(null) }
-    var passwordError by rememberSaveable { mutableStateOf<String?>(null) }
-    var confirmPasswordError by rememberSaveable { mutableStateOf<String?>(null) }
-    val uiState by viewModel.uiState.collectAsState()
-    val scrollState = rememberScrollState()
+
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val isFormValid by viewModel.isFormValid.collectAsStateWithLifecycle()
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle register success
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) {
-            snackbarHostState.showSnackbar("Pendaftaran berhasil. Silakan login.")
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) {
+            snackbarHostState.showSnackbar("Register berhasil")
+            kotlinx.coroutines.delay(1000)
             onRegisterSuccess()
         }
     }
 
     // Handle error
-    uiState.errorMessage?.let { errorMessage ->
-        LaunchedEffect(errorMessage) {
-            snackbarHostState.showSnackbar(
-                message = errorMessage,
-                withDismissAction = true
-            )
-            viewModel.clearError()
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+            viewModel.onEvent(RegisterEvent.ErrorShown)
         }
     }
 
-
-    // logic validation most be in custom text field
-    fun validateInputs(): Boolean {
-        var isValid = true
-
-        if (name.isBlank()) {
-            nameError = "Nama tidak boleh kosong"
-            isValid = false
-        } else if (name.length < 3) {
-            nameError = "Nama minimal 3 karakter"
-            isValid = false
-        } else {
-            nameError = null
-        }
-
-        if (email.isBlank()) {
-            emailError = "Email tidak boleh kosong"
-            isValid = false
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailError = "Format email tidak valid"
-            isValid = false
-        } else {
-            emailError = null
-        }
-
-        if (password.isBlank()) {
-            passwordError = "Password tidak boleh kosong"
-            isValid = false
-        }
-
-        if (confirmPassword.isBlank()) {
-            confirmPasswordError = "Konfirmasi password tidak boleh kosong"
-            isValid = false
-        } else if (password != confirmPassword) {
-            confirmPasswordError = "Password dan konfirmasi password tidak sama"
-            isValid = false
-        } else {
-            confirmPasswordError = null
-        }
-
-        return isValid
-
-    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(innerPadding)
                 .padding(16.dp)
-                .verticalScroll(scrollState),
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header Section
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(bottom = 32.dp)
@@ -147,124 +91,91 @@ fun RegisterScreen(
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.primary
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
+                Spacer(Modifier.height(8.dp))
                 Text(
                     text = "Buat akun baru untuk memulai",
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.height(16.dp))
+                Image(
+                    painter = painterResource(id = R.drawable.dimasjid_layo),
+                    contentDescription = "register image",
+                    modifier = Modifier
+                        .size(180.dp)
+                        .clip(MaterialTheme.shapes.medium),
+                    contentScale = ContentScale.Crop
                 )
             }
 
-            // Image Section
-            Image(
-                painter = painterResource(id = R.drawable.dimasjid_layo),
-                contentDescription = "register image",
-                modifier = Modifier
-                    .size(180.dp)
-                    .clip(MaterialTheme.shapes.medium),
-                contentScale = ContentScale.Crop
-            )
+            Spacer(modifier = Modifier.padding(16.dp))
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Form Section
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
+                // name input
                 NameTextField(
-                    value = name,
-                    onValueChange = {
-                        name = it
-                        nameError = null
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = nameError != null,
-                    errorMessage = nameError,
-                    enabled = !uiState.isLoading
+                    value = state.name,
+                    onValueChange = { onEvent(RegisterEvent.NameChanged(it)) },
+                    isError = state.nameError != null,
+                    errorMessage = state.nameError,
+                    enabled = !state.isLoading
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
+                Spacer(Modifier.height(16.dp))
+                // email input
                 EmailTextField(
-                    value = email,
-                    onValueChange = {
-                        email = it
-                        emailError = null
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = emailError != null,
-                    errorMessage = emailError,
-                    enabled = !uiState.isLoading
+                    value = state.email,
+                    onValueChange = { onEvent(RegisterEvent.EmailChanged(it)) },
+                    isError = state.emailError != null,
+                    errorMessage = state.emailError,
+                    enabled = !state.isLoading
                 )
+                Spacer(Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
-
+                // password input
                 PasswordTextField(
-                    value = password,
-                    onValueChange = {
-                        password = it
-                        passwordError = null
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = passwordError != null,
-                    errorMessage = passwordError,
-                    enabled = !uiState.isLoading
+                    value = state.password,
+                    onValueChange = { onEvent(RegisterEvent.PasswordChanged(it)) },
+                    isError = state.passwordError != null,
+                    errorMessage = state.passwordError,
+                    enabled = !state.isLoading,
                 )
+                Spacer(Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
-
+                // confirm password
                 PasswordTextField(
-                    value = confirmPassword,
-                    onValueChange = {
-                        confirmPassword = it
-                        confirmPasswordError = null
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = confirmPasswordError != null,
-                    errorMessage = confirmPasswordError,
-                    enabled = !uiState.isLoading
+                    value = state.confirmPassword,
+                    onValueChange = { onEvent(RegisterEvent.ConfirmPasswordChanged(it)) },
+                    isError = state.confirmPasswordError != null,
+                    errorMessage = state.confirmPasswordError,
+                    enabled = !state.isLoading,
+//                    placeholder = "Konfirmasi password"
+                )
+                Spacer(Modifier.height(32.dp))
+                // register button
+                GradientButton(
+                    text = "Daftar",
+                    onClick = { onEvent(RegisterEvent.Submit) },
+                    enabled = isFormValid && !state.isLoading,
+                    isLoading = state.isLoading
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(Modifier.height(16.dp))
 
-                // Register Button
-                Button(
-                    onClick = {
-                        if (validateInputs()) {
-                            viewModel.registerUser(name, email, password)
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    enabled = !uiState.isLoading && name.isNotBlank() && email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank(),
-                ) {
-                    if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Text(
-                            text = "Daftar",
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Login Navigation
+                // Navigate to Login
                 TextButton(
                     onClick = onNavigateToLogin,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxWidth()
+                        .height(56.dp),
                 ) {
                     Text(
                         text = "Sudah punya akun? Masuk",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }

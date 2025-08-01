@@ -1,6 +1,5 @@
 package com.example.docmat.presentation.ui.screens.auth.login
 
-import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -22,11 +19,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,9 +29,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.docmat.LoginEvent
 import com.example.docmat.R
 import com.example.docmat.presentation.ui.component.EmailTextField
+import com.example.docmat.presentation.ui.component.GradientButton
 import com.example.docmat.presentation.ui.component.PasswordTextField
 
 @Composable
@@ -46,58 +43,25 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     viewModel: LoginViewModel = viewModel()
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var emailError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
-    val uiState by viewModel.uiState.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val isFormValid by viewModel.isFormValid.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Handle login success
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) {
+    LaunchedEffect(state.isSuccess) {
+        if (state.isSuccess) {
             snackbarHostState.showSnackbar("Login berhasil")
             onLoginSuccess()
         }
     }
 
-    // Show error message
-    uiState.errorMessage?.let { error ->
-        LaunchedEffect(error) {
-            snackbarHostState.showSnackbar(
-                message = error,
-                withDismissAction = true
-            )
-            viewModel.clearError()
+    // Handle error
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+            viewModel.onEvent(LoginEvent.ErrorShown)
         }
-    }
-
-
-    fun validateInputs(): Boolean {
-        var isValid = true
-
-        if (email.isBlank()) {
-            emailError = "Email tidak boleh kosong"
-            isValid = false
-        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailError = "Format email tidak valid"
-            isValid = false
-        } else {
-            emailError = null
-        }
-
-        if (password.isBlank()) {
-            passwordError = "Password tidak boleh kosong"
-            isValid = false
-        } else if (password.length < 6) {
-            passwordError = "Password minimal 6 karakter"
-            isValid = false
-        } else {
-            passwordError = null
-        }
-
-        return isValid
     }
 
     Scaffold(
@@ -152,61 +116,42 @@ fun LoginScreen(
                 Column(
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    // Email TextField
                     EmailTextField(
-                        value = email,
-                        onValueChange = {
-                            email = it
-                            emailError = null
-                        },
+                        value = state.email,
+                        onValueChange = { viewModel.onEvent(LoginEvent.EmailChanged(it)) },
                         modifier = Modifier.fillMaxWidth(),
-                        isError = emailError != null,
-                        errorMessage = emailError,
-                        enabled = !uiState.isLoading
+                        isError = state.emailError != null,
+                        errorMessage = state.emailError,
+                        enabled = !state.isLoading,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Password TextField
                     PasswordTextField(
-                        value = password,
+                        value = state.password,
                         onValueChange = {
-                            password = it
-                            passwordError = null
+                            viewModel.onEvent(LoginEvent.PasswordChanged(it))
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        isError = passwordError != null,
-                        errorMessage = passwordError,
-                        enabled = !uiState.isLoading
+                        isError = state.passwordError != null,
+                        errorMessage = state.passwordError,
+                        enabled = !state.isLoading
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Login Button with loading indicator
-                    Button(
+                    GradientButton(
+                        text = "Login",
                         onClick = {
-                            if (validateInputs()) {
-                                viewModel.loginUser(email, password)
-                            }
+                            viewModel.onEvent(LoginEvent.Submit)
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxWidth()
-                            .height(56.dp),
-                        enabled = !uiState.isLoading && email.isNotBlank() && password.isNotBlank(),
-                    ) {
-                        if (uiState.isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        } else {
-                            Text(
-                                text = "Masuk",
-                                style = MaterialTheme.typography.labelLarge,
-                            )
-                        }
-                    }
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = isFormValid && !state.isLoading,
+                        isLoading = state.isLoading
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -217,7 +162,6 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .fillMaxWidth()
                             .height(56.dp),
-                        enabled = !uiState.isLoading
                     ) {
                         Text(
                             text = "Belum punya akun? Daftar",
