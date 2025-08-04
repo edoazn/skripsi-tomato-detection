@@ -1,10 +1,92 @@
 # news_service.py
 
+
 def get_news_data():
     """
     Sumber data utama untuk berita. Setiap item berisi konten lengkap.
     """
     news_items = [
+        {
+            "title": "Kembali Meroket! Harga Tomat Capai Rp 20‑30 rb/kg",
+            "description": "Distribusi terganggu dan cuaca menyebabkan harga tomat melonjak tajam.",
+            "url": "https://klikpertanian.id/.../harga-tomat-naik-pasar",
+            "imageUrl": "https://placehold.co/600x400/f87171/FFFFFF?text=Harga+Tomat",
+            "publishedAt": "2025-07-06T00:01:00Z",
+            "source": "Klik Pertanian",
+            "content": "Harga tomat naik pesat hingga Rp 20.000‑30.000/kg disebabkan gangguan distribusi dan curah hujan ekstrem.",
+        },
+        {
+            "title": "Tren dan Inovasi Budidaya Tomat di Indonesia 2025",
+            "description": "Teknologi dan peran pemerintah dorong produktivitas tomat nasional.",
+            "url": "https://estuary.co.id/2025/05/03/perkebunan-tomat-tren",
+            "imageUrl": "https://placehold.co/600x400/22c55e/FFFFFF?text=Inovasi",
+            "publishedAt": "2025-05-03T00:00:00Z",
+            "source": "Estuary.co.id",
+            "content": "Artikel membahas tren produktivitas, inovasi teknologi, dan dukungan pemerintah dalam budidaya tomat.",
+        },
+        {
+            "title": "Indonesia’s Cherry Tomato Revolution",
+            "description": "Penelitian kustumisasi sistem tanam dan irigasi pada varietas tomat ceri.",
+            "url": "https://agritechinsights.com/.../cherry-tomato-revolution",
+            "imageUrl": "https://placehold.co/600x400/eab308/FFFFFF?text=Cherry+Tomat",
+            "publishedAt": "2025-03-26T00:00:00Z",
+            "source": "Agritech Insights",
+            "content": "Studi dari Universitas Padjadjaran menunjukkan Fortesa unggul dari Ruby dalam yield dan kualitas.",
+        },
+        {
+            "title": "Petani Tomat Menjerit: Harga Turun Jadi Rp 1.000/kg",
+            "description": "Petani di Karo merugi besar akibat harga tomat yang anjlok.",
+            "url": "https://cnnindonesia.id/2024/08/02/petani-tomat-menjerit",
+            "imageUrl": "https://placehold.co/600x400/facc15/FFFFFF?text=Harga+Turun",
+            "publishedAt": "2024-08-02T12:15:00Z",
+            "source": "CNN Indonesia",
+            "content": "Harga tomat turun drastis hingga Rp 1.000/kg, petani berharap solusi dari pemerintah.",
+        },
+        {
+            "title": "Analisis Keunggulan Kompetitif Tomat RI",
+            "description": "Studi PLOS membahas komparatif dan strategi peningkatan ekspor tomat.",
+            "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0294980",
+            "imageUrl": "https://placehold.co/600x400/84cc16/FFFFFF?text=Ekspor",
+            "publishedAt": "2023-11-30T00:00:00Z",
+            "source": "PLOS One",
+            "content": "Hasil PAM menunjukkan RI punya keuntungan komparatif tomat di luar Jawa dan potensi ekspor tinggi.",
+        },
+        {
+            "title": "Sektor Pertanian RI Tumbuh 10.52% di Q1‑2025",
+            "description": "Pertanian jadi pendorong utama ekonomi nasional menurut INDEF.",
+            "url": "https://www.jakartadaily.id/.../agriculture-growth-q1-2025",
+            "imageUrl": "https://placehold.co/600x400/3b82f6/FFFFFF?text=Ekonomi",
+            "publishedAt": "2025-05-07T10:00:00Z",
+            "source": "Jakarta Daily",
+            "content": "Ekspansi sektor pertanian didorong oleh panen besar padi dan jagung, berdampak positif ke subsektor hortikultura.",
+        },
+        {
+            "title": "UAV untuk Irigasi dan Monitoring Tomat",
+            "description": "Ulasan penggunaan drone di pertanian modern Indonesia.",
+            "url": "https://arxiv.org/abs/2301.00379",
+            "imageUrl": "https://placehold.co/600x400/a16207/FFFFFF?text=Drone",
+            "publishedAt": "2023-01-01T00:00:00Z",
+            "source": "ArXiv",
+            "content": "UAV digunakan untuk penyemprotan dan monitoring tanaman tomat, meningkatkan efisiensi dan kontrol hama.",
+        },
+        {
+            "title": "Deep Learning untuk Deteksi Penyakit Tomat",
+            "description": "Model CNN VGG19 dan Inception v3 mencapai akurasi 94%.",
+            "url": "https://arxiv.org/abs/2501.12052",
+            "imageUrl": "https://placehold.co/600x400/94a3b8/FFFFFF?text=AI+Deteksi",
+            "publishedAt": "2025-01-21T00:00:00Z",
+            "source": "Aggrotech Journal",
+            "content": "Model deep learning membantu deteksi penyakit daun tomat secara cepat dan akurat.",
+        },
+        {
+            "title": "Mulsa Superhidrofobik Tingkatkan Produktivitas Tomat",
+            "description": "Sand mulch inovatif kurangi penguapan dan tingkatkan hasil panen.",
+            "url": "https://arxiv.org/abs/2102.00495",
+            "imageUrl": "https://placehold.co/600x400/22c55e/FFFFFF?text=Mulsa",
+            "publishedAt": "2021-01-31T00:00:00Z",
+            "source": "Environmental Science",
+            "content": "Mulsa pasir superhidrofobik meningkatkan efisiensi air dan hasil tomat di kondisi kering.",
+        },
         {
             "title": "Penyebab Busuk Buah pada Tomat dan Cara Mengatasinya",
             "description": "Busuk buah menjadi salah satu kendala dalam budidaya tomat. Kondisi ini dapat disebabkan oleh beberapa faktor, salah satunya defisiensi kalsium.",
@@ -12,7 +94,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/ef4444/FFFFFF?text=Busuk+Buah",
             "publishedAt": "2024-07-19T10:00:00Z",
             "source": "Pertanianku.com",
-            "content": """Busuk buah menjadi salah satu kendala dalam budidaya tomat. Kondisi ini dapat disebabkan oleh beberapa faktor, salah satunya defisiensi kalsium. Namun, ada juga faktor lain seperti serangan jamur patogen yang bisa menyebabkan buah tomat menjadi busuk.\n\nGejala busuk buah akibat kekurangan kalsium biasanya dimulai dengan munculnya bercak kecil berwarna coklat kehitaman di bagian bawah buah (blossom-end rot). Bercak ini akan semakin membesar dan melekuk seiring dengan perkembangan buah. Kondisi ini sering terjadi saat musim kemarau atau ketika penyiraman tidak teratur.\n\nSementara itu, busuk buah akibat jamur (anthracnose) biasanya ditandai dengan bercak basah yang melingkar dan sedikit tertekan pada permukaan buah. Seiring waktu, bercak ini akan membesar dan seringkali muncul titik-titik hitam di tengahnya yang merupakan badan buah jamur. Penyakit ini cepat menyebar pada kondisi cuaca yang lembab dan hangat.\n\nUntuk mengatasinya, pastikan tanaman mendapatkan suplai kalsium yang cukup dengan memberikan pupuk yang mengandung kalsium atau pengapuran pada tanah sebelum tanam. Jaga kelembaban tanah dengan penyiraman yang teratur dan gunakan mulsa untuk mengurangi penguapan. Untuk pencegahan jamur, lakukan penyemprotan fungisida secara berkala dan jaga kebersihan kebun dari sisa-sisa tanaman yang terinfeksi."""
+            "content": """Busuk buah menjadi salah satu kendala dalam budidaya tomat. Kondisi ini dapat disebabkan oleh beberapa faktor, salah satunya defisiensi kalsium. Namun, ada juga faktor lain seperti serangan jamur patogen yang bisa menyebabkan buah tomat menjadi busuk.\n\nGejala busuk buah akibat kekurangan kalsium biasanya dimulai dengan munculnya bercak kecil berwarna coklat kehitaman di bagian bawah buah (blossom-end rot). Bercak ini akan semakin membesar dan melekuk seiring dengan perkembangan buah. Kondisi ini sering terjadi saat musim kemarau atau ketika penyiraman tidak teratur.\n\nSementara itu, busuk buah akibat jamur (anthracnose) biasanya ditandai dengan bercak basah yang melingkar dan sedikit tertekan pada permukaan buah. Seiring waktu, bercak ini akan membesar dan seringkali muncul titik-titik hitam di tengahnya yang merupakan badan buah jamur. Penyakit ini cepat menyebar pada kondisi cuaca yang lembab dan hangat.\n\nUntuk mengatasinya, pastikan tanaman mendapatkan suplai kalsium yang cukup dengan memberikan pupuk yang mengandung kalsium atau pengapuran pada tanah sebelum tanam. Jaga kelembaban tanah dengan penyiraman yang teratur dan gunakan mulsa untuk mengurangi penguapan. Untuk pencegahan jamur, lakukan penyemprotan fungisida secara berkala dan jaga kebersihan kebun dari sisa-sisa tanaman yang terinfeksi.""",
         },
         {
             "title": "Cara Mengendalikan Penyakit Bercak Daun pada Tanaman Tomat",
@@ -21,7 +103,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/a16207/FFFFFF?text=Bercak+Daun",
             "publishedAt": "2024-06-22T14:30:00Z",
             "source": "Dinas Pertanian Buleleng",
-            "content": """Penyakit bercak daun merupakan salah satu penyakit yang sering menyerang tanaman tomat. Penyakit ini disebabkan oleh jamur Cercospora capsici. Gejala awal ditandai dengan adanya bercak kecil, bulat, berair pada daun. Bercak tersebut kemudian berkembang menjadi lebih besar, dengan diameter mencapai 0,5 cm, berwarna putih atau abu-abu di bagian tengahnya, dan dikelilingi oleh tepi berwarna coklat tua.\n\nSerangan berat dapat menyebabkan daun menguning, kering, dan akhirnya rontok sebelum waktunya. Kondisi ini tentu akan menghambat proses fotosintesis dan menurunkan produktivitas tanaman secara signifikan. Penyakit ini berkembang pesat pada suhu hangat (25-30°C) dan kelembaban udara yang tinggi.\n\nPengendalian dapat dilakukan dengan beberapa cara:\n1.  **Kultur Teknis:** Lakukan rotasi tanaman dengan tanaman yang bukan inang jamur. Jaga kebersihan kebun dan musnahkan sisa-sisa tanaman yang terinfeksi.\n2.  **Pengendalian Hayati:** Manfaatkan agens hayati seperti jamur Trichoderma sp. atau bakteri Pseudomonas fluorescens.\n3.  **Pengendalian Kimiawi:** Jika serangan sudah parah, gunakan fungisida dengan bahan aktif seperti mankozeb, klorotalonil, atau propineb. Lakukan penyemprotan sesuai dosis anjuran."""
+            "content": """Penyakit bercak daun merupakan salah satu penyakit yang sering menyerang tanaman tomat. Penyakit ini disebabkan oleh jamur Cercospora capsici. Gejala awal ditandai dengan adanya bercak kecil, bulat, berair pada daun. Bercak tersebut kemudian berkembang menjadi lebih besar, dengan diameter mencapai 0,5 cm, berwarna putih atau abu-abu di bagian tengahnya, dan dikelilingi oleh tepi berwarna coklat tua.\n\nSerangan berat dapat menyebabkan daun menguning, kering, dan akhirnya rontok sebelum waktunya. Kondisi ini tentu akan menghambat proses fotosintesis dan menurunkan produktivitas tanaman secara signifikan. Penyakit ini berkembang pesat pada suhu hangat (25-30°C) dan kelembaban udara yang tinggi.\n\nPengendalian dapat dilakukan dengan beberapa cara:\n1.  **Kultur Teknis:** Lakukan rotasi tanaman dengan tanaman yang bukan inang jamur. Jaga kebersihan kebun dan musnahkan sisa-sisa tanaman yang terinfeksi.\n2.  **Pengendalian Hayati:** Manfaatkan agens hayati seperti jamur Trichoderma sp. atau bakteri Pseudomonas fluorescens.\n3.  **Pengendalian Kimiawi:** Jika serangan sudah parah, gunakan fungisida dengan bahan aktif seperti mankozeb, klorotalonil, atau propineb. Lakukan penyemprotan sesuai dosis anjuran.""",
         },
         {
             "title": "Mengenal Hama Kutu Kebul, Vektor Virus Keriting pada Tomat",
@@ -30,7 +112,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/eab308/FFFFFF?text=Kutu+Kebul",
             "publishedAt": "2024-05-10T09:00:00Z",
             "source": "Litbang Pertanian",
-            "content": """Kutu kebul (Bemisia tabaci) adalah serangga kecil berwarna putih yang sering ditemukan bergerombol di bagian bawah daun. Meskipun ukurannya kecil, hama ini sangat berbahaya karena dua alasan utama: pertama, ia menghisap cairan tanaman yang menyebabkan daun menjadi keriput dan pertumbuhan terhambat. Kedua, dan yang paling merusak, kutu kebul adalah vektor utama penyebaran Tomato Yellow Leaf Curl Virus (TYLCV) atau Virus Keriting Daun Kuning.\n\nVirus ini tidak bisa disembuhkan dan menyebabkan kerugian panen total. Oleh karena itu, pengendalian kutu kebul adalah kunci utama. Beberapa metode pengendalian yang efektif meliputi:\n\n- **Fisik/Mekanis:** Memasang perangkap perekat kuning (yellow sticky traps) di sekitar tanaman untuk menarik dan menjebak kutu kebul dewasa.\n- **Kimiawi:** Menggunakan insektisida dengan bahan aktif seperti abamektin, tiametoksam, atau imidakloprid. Lakukan rotasi bahan aktif untuk mencegah resistensi hama.\n- **Hayati:** Memanfaatkan musuh alami seperti predator kumbang koksi atau parasitoid Encarsia formosa."""
+            "content": """Kutu kebul (Bemisia tabaci) adalah serangga kecil berwarna putih yang sering ditemukan bergerombol di bagian bawah daun. Meskipun ukurannya kecil, hama ini sangat berbahaya karena dua alasan utama: pertama, ia menghisap cairan tanaman yang menyebabkan daun menjadi keriput dan pertumbuhan terhambat. Kedua, dan yang paling merusak, kutu kebul adalah vektor utama penyebaran Tomato Yellow Leaf Curl Virus (TYLCV) atau Virus Keriting Daun Kuning.\n\nVirus ini tidak bisa disembuhkan dan menyebabkan kerugian panen total. Oleh karena itu, pengendalian kutu kebul adalah kunci utama. Beberapa metode pengendalian yang efektif meliputi:\n\n- **Fisik/Mekanis:** Memasang perangkap perekat kuning (yellow sticky traps) di sekitar tanaman untuk menarik dan menjebak kutu kebul dewasa.\n- **Kimiawi:** Menggunakan insektisida dengan bahan aktif seperti abamektin, tiametoksam, atau imidakloprid. Lakukan rotasi bahan aktif untuk mencegah resistensi hama.\n- **Hayati:** Memanfaatkan musuh alami seperti predator kumbang koksi atau parasitoid Encarsia formosa.""",
         },
         {
             "title": "Teknik Budidaya Tomat Dataran Rendah Agar Panen Melimpah",
@@ -39,7 +121,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/22c55e/FFFFFF?text=Budidaya+Tomat",
             "publishedAt": "2024-04-15T11:45:00Z",
             "source": "Tabloid Sinar Tani",
-            "content": """Budidaya tomat di dataran rendah memiliki tantangan tersendiri, terutama suhu udara yang lebih tinggi dan kelembapan yang dapat memicu penyakit. Namun, dengan beberapa penyesuaian teknis, panen melimpah tetap bisa dicapai.\n\nBerikut adalah beberapa kunci suksesnya:\n\n1.  **Pemilihan Varietas:** Pilih varietas tomat yang toleran terhadap suhu panas. Beberapa varietas hibrida seperti Servo, Tymoti, atau Betavila dikenal memiliki adaptasi yang baik di dataran rendah.\n2.  **Pengaturan Waktu Tanam:** Hindari menanam di puncak musim hujan untuk mengurangi risiko serangan jamur. Awal atau akhir musim kemarau seringkali menjadi waktu yang lebih ideal.\n3.  **Irigasi yang Tepat:** Gunakan sistem irigasi tetes untuk menjaga kelembapan tanah tetap stabil tanpa membasahi daun, yang dapat mengurangi risiko penyakit daun.\n4.  **Sirkulasi Udara:** Berikan jarak tanam yang cukup (misalnya 60x70 cm) dan lakukan pemangkasan tunas air secara rutin untuk memastikan sirkulasi udara lancar di sekitar tanaman."""
+            "content": """Budidaya tomat di dataran rendah memiliki tantangan tersendiri, terutama suhu udara yang lebih tinggi dan kelembapan yang dapat memicu penyakit. Namun, dengan beberapa penyesuaian teknis, panen melimpah tetap bisa dicapai.\n\nBerikut adalah beberapa kunci suksesnya:\n\n1.  **Pemilihan Varietas:** Pilih varietas tomat yang toleran terhadap suhu panas. Beberapa varietas hibrida seperti Servo, Tymoti, atau Betavila dikenal memiliki adaptasi yang baik di dataran rendah.\n2.  **Pengaturan Waktu Tanam:** Hindari menanam di puncak musim hujan untuk mengurangi risiko serangan jamur. Awal atau akhir musim kemarau seringkali menjadi waktu yang lebih ideal.\n3.  **Irigasi yang Tepat:** Gunakan sistem irigasi tetes untuk menjaga kelembapan tanah tetap stabil tanpa membasahi daun, yang dapat mengurangi risiko penyakit daun.\n4.  **Sirkulasi Udara:** Berikan jarak tanam yang cukup (misalnya 60x70 cm) dan lakukan pemangkasan tunas air secara rutin untuk memastikan sirkulasi udara lancar di sekitar tanaman.""",
         },
         {
             "title": "Pentingnya Pemupukan Berimbang pada Tanaman Tomat",
@@ -48,7 +130,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/84cc16/FFFFFF?text=Pemupukan",
             "content": """Pemupukan berimbang adalah kunci untuk mendapatkan tanaman tomat yang sehat dan produktif. Ini berarti memberikan unsur hara makro (N, P, K) dan mikro dalam jumlah yang tepat dan pada waktu yang tepat.\n\n- **Nitrogen (N):** Penting untuk pertumbuhan vegetatif, yaitu daun dan batang. Diberikan lebih banyak pada fase awal pertumbuhan.\n- **Fosfor (P):** Merangsang pertumbuhan akar, pembungaan, dan pembuahan. Sangat krusial saat tanaman mulai berbunga.\n- **Kalium (K):** Berperan penting dalam kualitas buah, seperti rasa, warna, ukuran, dan daya simpan. Dibutuhkan dalam jumlah besar saat fase pengisian buah.\n\nSebagai panduan umum, gunakan pupuk NPK dengan rasio seimbang seperti 16-16-16 pada fase awal. Saat tanaman memasuki fase generatif (berbunga dan berbuah), ganti ke pupuk dengan kandungan P dan K yang lebih tinggi, seperti pupuk MKP atau NPK grower.""",
             "publishedAt": "2024-03-29T08:00:00Z",
-            "source": "Cybex Pertanian"
+            "source": "Cybex Pertanian",
         },
         {
             "title": "Cara Mengatasi Serangan Virus Gemini (Kuning) pada Tomat",
@@ -57,7 +139,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/facc15/FFFFFF?text=Virus+Kuning",
             "content": """Virus Gemini, atau yang sering disebut penyakit kuning atau keriting, adalah salah satu penyakit paling merusak pada tomat. Penyakit ini disebabkan oleh Tomato Yellow Leaf Curl Virus (TYLCV).\n\nGejala khasnya adalah daun muda menjadi kerdil, menguning, melengkung ke atas (keriting seperti mangkok), dan kaku. Pertumbuhan tanaman akan terhenti dan tidak mampu menghasilkan buah. Hingga saat ini, belum ada obat yang bisa menyembuhkan tanaman yang sudah terinfeksi.\n\nOleh karena itu, tindakan terbaik adalah pencegahan, yang berfokus pada pengendalian serangga vektornya, yaitu kutu kebul (Bemisia tabaci). Langkah-langkah pencegahan meliputi:\n- Penggunaan varietas tomat yang tahan virus.\n- Pemasangan screen net (kasa) di persemaian untuk mencegah kutu kebul masuk.\n- Pemasangan yellow sticky trap (perangkap perekat kuning).\n- Penyemprotan insektisida secara rutin untuk menekan populasi kutu kebul.""",
             "publishedAt": "2024-02-11T16:20:00Z",
-            "source": "Kabar Tani"
+            "source": "Kabar Tani",
         },
         {
             "title": "Manfaat Mulsa Plastik untuk Budidaya Tanaman Tomat",
@@ -66,7 +148,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/475569/FFFFFF?text=Mulsa+Plastik",
             "content": """Mulsa plastik hitam perak (MPHP) adalah teknologi sederhana yang memberikan banyak sekali keuntungan dalam budidaya tomat. Sisi hitam menghadap ke bawah, sementara sisi perak menghadap ke atas.\n\nManfaat utamanya antara lain:\n\n1.  **Menekan Gulma:** Sisi hitam mencegah sinar matahari mencapai tanah, sehingga gulma tidak dapat tumbuh.\n2.  **Menjaga Kelembaban Tanah:** Mengurangi penguapan air dari permukaan tanah, sehingga efisiensi penggunaan air meningkat.\n3.  **Mengusir Hama:** Warna perak memantulkan sinar matahari, yang tidak disukai oleh hama seperti kutu daun (aphids) dan thrips.\n4.  **Menjaga Suhu Tanah:** Menjaga suhu tanah tetap stabil, baik di siang maupun malam hari.\n5.  **Mencegah Penyakit:** Mengurangi percikan tanah ke daun saat hujan, yang dapat membawa spora jamur penyebab penyakit.\n6.  **Menjaga Buah Tetap Bersih:** Buah yang menyentuh mulsa akan lebih bersih dibandingkan yang menyentuh tanah langsung.""",
             "publishedAt": "2024-01-20T13:00:00Z",
-            "source": "Pak Tani Digital"
+            "source": "Pak Tani Digital",
         },
         {
             "title": "Pengendalian Hama Lalat Buah yang Menyerang Tomat",
@@ -75,7 +157,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/fb923c/FFFFFF?text=Lalat+Buah",
             "content": """Lalat buah (Bactrocera sp.) adalah hama yang sangat merugikan karena menyerang langsung bagian yang paling berharga, yaitu buah. Lalat betina dewasa akan menyuntikkan telurnya ke dalam buah tomat yang masih muda. Telur kemudian menetas menjadi larva (belatung) yang akan memakan daging buah dari dalam, menyebabkan buah menjadi busuk, berair, dan akhirnya rontok sebelum panen.\n\nMetode pengendalian yang bisa diterapkan adalah:\n\n- **Pemasangan Perangkap:** Gunakan perangkap yang mengandung atraktan atau pemikat seperti metil eugenol atau petrogenol. Perangkap ini akan menarik lalat jantan sehingga tidak dapat membuahi lalat betina.\n- **Sanitasi Kebun:** Kumpulkan dan musnahkan semua buah yang sudah terserang dan rontok. Jangan membiarkannya membusuk di lahan karena akan menjadi sumber perkembangbiakan lalat buah.\n- **Pembungkusan Buah:** Untuk budidaya skala kecil atau untuk buah bernilai tinggi, pembungkusan buah dengan plastik atau kertas khusus bisa menjadi cara yang sangat efektif.""",
             "publishedAt": "2023-12-18T10:15:00Z",
-            "source": "DPKPP DIY"
+            "source": "DPKPP DIY",
         },
         {
             "title": "Cara Membuat Pestisida Nabati dari Bawang Putih",
@@ -84,7 +166,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/a3e635/FFFFFF?text=Pestisida+Nabati",
             "content": """Pestisida nabati dari bawang putih adalah cara yang murah, mudah, dan ramah lingkungan untuk mengendalikan hama penghisap seperti kutu daun, thrips, dan tungau.\n\nBerikut cara sederhana untuk membuatnya:\n\n1.  **Bahan:** Siapkan 100 gram bawang putih, 1 liter air, dan sedikit sabun cuci piring (sebagai perekat).\n2.  **Proses:** Blender atau tumbuk halus bawang putih. Campurkan dengan 1 liter air dan aduk hingga rata. Diamkan campuran tersebut selama 24 jam di tempat yang tertutup.\n3.  **Aplikasi:** Saring campuran dengan kain halus. Tambahkan beberapa tetes sabun cuci piring ke dalam larutan hasil saringan, lalu masukkan ke dalam botol semprot.\n\nSemprotkan larutan ini ke seluruh bagian tanaman, terutama di bagian bawah daun, pada pagi atau sore hari. Ulangi aplikasi setiap 3-5 hari sekali atau setelah hujan.""",
             "publishedAt": "2023-11-05T11:00:00Z",
-            "source": "DLH Semarang"
+            "source": "DLH Semarang",
         },
         {
             "title": "Pengendalian Penyakit Layu Fusarium pada Tomat",
@@ -93,7 +175,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/78350f/FFFFFF?text=Layu+Fusarium",
             "content": """Penyakit layu Fusarium disebabkan oleh jamur tanah Fusarium oxysporum f.sp. lycopersici. Jamur ini menginfeksi tanaman melalui akar dan menyumbat jaringan pembuluh (xilem), sehingga transportasi air dan nutrisi terganggu. Akibatnya, tanaman menjadi layu seolah-olah kekurangan air.\n\nGejala khasnya adalah daun bagian bawah menguning (seringkali hanya pada satu sisi tanaman atau satu cabang), diikuti oleh kelayuan yang terjadi pada siang hari dan tampak segar kembali pada malam hari. Pada akhirnya, tanaman akan layu permanen dan mati.\n\nKarena sangat sulit diobati, fokus utama adalah pencegahan:\n- Gunakan varietas tomat yang tahan terhadap Fusarium.\n- Lakukan rotasi tanaman dengan tanaman yang bukan inang (misalnya jagung atau padi).\n- Jaga pH tanah tetap netral (sekitar 6.5-7.0) dengan pengapuran.\n- Gunakan agens hayati seperti Trichoderma yang dapat menekan pertumbuhan jamur patogen.""",
             "publishedAt": "2023-10-21T09:30:00Z",
-            "source": "Dinas Pertanian Pontianak"
+            "source": "Dinas Pertanian Pontianak",
         },
         {
             "title": "5 Tanda Tomat Siap Panen, Apa Saja?",
@@ -102,7 +184,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/f87171/FFFFFF?text=Panen+Tomat",
             "content": """Memanen tomat pada waktu yang tepat akan memaksimalkan rasa, nutrisi, dan daya simpan buah. Berikut adalah 5 tanda utama bahwa tomat Anda sudah siap dipetik:\n\n1.  **Warna Merata:** Sebagian besar permukaan buah sudah berubah warna secara merata sesuai dengan jenisnya (misalnya merah, kuning, atau oranye). Jangan menunggu hingga 100% matang di pohon jika ingin disimpan lebih lama.\n2.  **Tekstur Buah:** Saat ditekan perlahan, buah terasa padat dan berisi, tetapi sedikit empuk. Jika terlalu keras, berarti masih mentah. Jika terlalu lembek, berarti sudah terlalu matang.\n3.  **Aroma Khas:** Buah tomat yang matang akan mengeluarkan aroma khas yang segar dan sedikit manis di dekat bagian tangkainya.\n4.  **Mudah Dipetik:** Tangkai buah akan mudah dilepaskan dari batang utama dengan sedikit putaran lembut.\n5.  **Ukuran Maksimal:** Buah telah mencapai ukuran maksimal sesuai dengan karakteristik varietasnya.""",
             "publishedAt": "2023-08-14T19:27:00Z",
-            "source": "Kompas.com"
+            "source": "Kompas.com",
         },
         {
             "title": "Budidaya Tomat Hidroponik, Peluang Usaha yang Menggiurkan",
@@ -111,7 +193,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/22d3ee/FFFFFF?text=Hidroponik",
             "content": """Hidroponik adalah teknik budidaya tanaman dengan memanfaatkan air sebagai media tanam utama yang kaya akan nutrisi. Untuk tomat, sistem hidroponik seperti irigasi tetes (drip irrigation) atau kultur air dalam (deep water culture) sangat populer.\n\nKeuntungan budidaya tomat secara hidroponik:\n- **Hemat Lahan:** Sangat cocok untuk area perkotaan atau lahan terbatas.\n- **Pertumbuhan Lebih Cepat:** Tanaman mendapatkan nutrisi yang dibutuhkan secara langsung dan terus-menerus.\n- **Kualitas Terkontrol:** Kualitas buah bisa lebih seragam karena nutrisi dan lingkungan terkontrol.\n- **Lebih Bersih:** Mengurangi risiko penyakit tular tanah dan buah yang dihasilkan lebih bersih.\n\nTantangannya meliputi biaya investasi awal untuk instalasi dan kebutuhan listrik untuk pompa air. Namun, dengan potensi hasil panen yang tinggi, hidroponik tomat menjadi peluang usaha yang menarik.""",
             "publishedAt": "2023-07-02T12:00:00Z",
-            "source": "Kementerian Pertanian RI"
+            "source": "Kementerian Pertanian RI",
         },
         {
             "title": "Pengendalian Penyakit Layu Bakteri pada Tanaman Tomat",
@@ -120,7 +202,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/ca8a04/FFFFFF?text=Layu+Bakteri",
             "content": """Layu bakteri adalah salah satu penyakit paling ditakuti oleh petani tomat karena dapat menyebabkan kematian tanaman dalam waktu sangat singkat. Penyakit ini disebabkan oleh bakteri tular tanah Ralstonia solanacearum.\n\nGejala utamanya adalah kelayuan yang sangat cepat pada seluruh bagian tanaman tanpa didahului gejala menguning pada daun. Tanaman tampak sehat di pagi hari, layu di siang hari, dan bisa mati dalam beberapa hari. Ciri khas untuk membedakannya dari layu fusarium adalah jika potongan batang yang terinfeksi dimasukkan ke dalam gelas berisi air bening, akan keluar lendir putih seperti susu dari bekas potongan tersebut. Lendir ini adalah massa bakteri.\n\nPengendalian sangat sulit. Fokus utama adalah pencegahan:\n- Gunakan bibit yang sehat dan bebas penyakit.\n- Hindari menanam di lahan yang memiliki riwayat penyakit ini.\n- Lakukan rotasi tanaman dengan tanaman bukan inang seperti jagung.\n- Jaga drainase lahan agar tidak tergenang air.""",
             "publishedAt": "2023-06-15T14:00:00Z",
-            "source": "Cybex Pertanian"
+            "source": "Cybex Pertanian",
         },
         {
             "title": "Mengenal Varietas Tomat Unggul Tahan Virus Gemini",
@@ -129,7 +211,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/16a34a/FFFFFF?text=Varietas+Unggul",
             "content": """Salah satu strategi paling efektif dan efisien untuk melawan penyakit Virus Kuning Keriting (Virus Gemini) adalah dengan menanam varietas yang sudah memiliki ketahanan genetik. Badan penelitian dan perusahaan benih terus berinovasi untuk menghasilkan varietas tomat hibrida yang tangguh.\n\nSaat memilih benih, perhatikan label pada kemasan. Biasanya akan tertera keterangan ketahanan terhadap penyakit. Cari kode seperti 'Tahan TYLCV' atau 'Toleran Virus Gemini'. Beberapa contoh varietas yang populer di kalangan petani karena ketahanannya antara lain Tymoti F1, Betavila F1, atau varietas lokal yang sudah teruji di daerah Anda.\n\nWalaupun varietas ini memiliki ketahanan, bukan berarti kebal 100%. Praktik budidaya yang baik seperti pengendalian vektor kutu kebul dan sanitasi lahan tetap harus dijalankan untuk menekan risiko serangan seminimal mungkin. Menggunakan varietas tahan adalah garda terdepan pertahanan Anda.""",
             "publishedAt": "2023-05-30T10:45:00Z",
-            "source": "Distan Pangan Bali"
+            "source": "Distan Pangan Bali",
         },
         {
             "title": "Penyebab Bunga Tomat Rontok dan Cara Mengatasinya",
@@ -138,7 +220,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/f472b6/FFFFFF?text=Bunga+Rontok",
             "content": """Kerontokan bunga pada tanaman tomat adalah masalah yang membuat frustrasi karena secara langsung berarti kegagalan pembentukan buah. Ada beberapa penyebab umum:\n\n1.  **Suhu Ekstrem:** Suhu yang terlalu panas (di atas 32°C) atau terlalu dingin (di bawah 13°C) dapat mengganggu proses penyerbukan dan menyebabkan bunga rontok.\n2.  **Stres Air:** Kekurangan atau kelebihan air dapat menyebabkan stres pada tanaman, yang memicu kerontokan bunga.\n3.  **Kekurangan Nutrisi:** Defisiensi unsur hara mikro seperti Boron (B) dan Kalsium (Ca) sangat berpengaruh pada kekuatan tangkai bunga dan proses pembuahan.\n4.  **Kurang Penyerbukan:** Kurangnya angin atau serangga penyerbuk dapat menyebabkan bunga tidak terbuahi dan akhirnya rontok.\n\nSolusinya adalah dengan menjaga penyiraman tetap konsisten, memberikan peneduh (naungan) jika cuaca terlalu panas, dan memastikan pemupukan yang seimbang, terutama pupuk yang mengandung unsur hara mikro.""",
             "publishedAt": "2023-04-19T08:30:00Z",
-            "source": "Mitalom.com"
+            "source": "Mitalom.com",
         },
         {
             "title": "Manfaat dan Cara Pengapuran Lahan Pertanian",
@@ -147,7 +229,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/a8a29e/FFFFFF?text=Pengapuran",
             "content": """Tingkat keasaman tanah (pH) adalah faktor kunci dalam kesuburan tanah. Sebagian besar lahan pertanian di Indonesia cenderung bersifat masam (pH rendah). Pada kondisi masam, unsur hara penting seperti Fosfor, Kalium, dan Magnesium menjadi terikat oleh tanah dan tidak tersedia bagi tanaman, meskipun Anda sudah memupuk.\n\nPengapuran adalah proses penambahan bahan kapur, seperti Kalsit (CaCO3) atau Dolomit (CaMg(CO3)2), ke dalam tanah untuk menaikkan pH-nya ke tingkat netral (sekitar 6.5).\n\nManfaat pengapuran:\n- Menaikkan pH tanah.\n- 'Membuka' ketersediaan unsur hara bagi tanaman.\n- Menambah unsur Kalsium (Ca) dan Magnesium (Mg) yang penting bagi tanaman.\n- Memperbaiki struktur tanah.\n\nPengapuran sebaiknya dilakukan 2-4 minggu sebelum proses penanaman, dengan cara disebar merata di permukaan tanah lalu dicampurkan saat pengolahan lahan.""",
             "publishedAt": "2023-03-25T15:00:00Z",
-            "source": "Dinas Pertanian Wonosobo"
+            "source": "Dinas Pertanian Wonosobo",
         },
         {
             "title": "Cara Memangkas Tunas Air pada Tanaman Tomat agar Berbuah Lebat",
@@ -156,7 +238,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/c084fc/FFFFFF?text=Wiwil+Tomat",
             "content": """Pemangkasan atau 'wiwil' adalah teknik membuang tunas-tunas air yang tumbuh di ketiak daun (di antara batang utama dan cabang daun). Tunas ini, jika dibiarkan, akan tumbuh menjadi batang baru yang juga akan menghasilkan daun dan bunga, tetapi seringkali dengan kualitas buah yang lebih rendah. Tunas ini menyerap banyak energi dan nutrisi dari tanaman.\n\nDengan membuang tunas air, kita memfokuskan energi dan nutrisi tanaman untuk:\n- Memperbesar ukuran buah pada batang utama.\n- Mempercepat pematangan buah.\n- Meningkatkan kualitas rasa dan warna buah.\n- Melancarkan sirkulasi udara di sekitar tanaman, sehingga mengurangi risiko penyakit jamur.\n\nLakukan pemangkasan saat tunas masih kecil (panjang 2-5 cm) menggunakan jari atau gunting yang bersih. Wiwil sebaiknya dilakukan secara rutin, misalnya seminggu sekali.""",
             "publishedAt": "2023-02-28T11:10:00Z",
-            "source": "Kumparan"
+            "source": "Kumparan",
         },
         {
             "title": "Hawar Daun Alternaria (Hawar Dini) pada Tomat",
@@ -165,7 +247,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/94a3b8/FFFFFF?text=Hawar+Dini",
             "content": """Hawar Daun Alternaria, atau sering disebut Hawar Dini (Early Blight), disebabkan oleh jamur Alternaria solani. Penyakit ini seringkali menjadi salah satu masalah utama dalam budidaya tomat, terutama di kondisi cuaca yang hangat dan lembab.\n\nGejala yang paling khas adalah munculnya bercak-bercak coklat tua pada daun, biasanya dimulai dari daun bagian bawah yang lebih tua. Bercak ini memiliki ciri khas berupa lingkaran-lingkaran konsentris di dalamnya, yang sering digambarkan seperti 'papan target'. Seiring perkembangan penyakit, bercak akan membesar dan daun akan menguning lalu mati.\n\nPengendaliannya meliputi:\n- Menjaga kebersihan kebun dari gulma dan sisa tanaman.\n- Memberikan jarak tanam yang cukup untuk sirkulasi udara.\n- Menghindari penyiraman dari atas yang membasahi daun.\n- Melakukan penyemprotan fungisida berbahan aktif mankozeb, klorotalonil, atau tembaga secara preventif.""",
             "publishedAt": "2023-01-15T16:00:00Z",
-            "source": "Plantix"
+            "source": "Plantix",
         },
         {
             "title": "Cara Membuat Pupuk Kompos dari Sampah Organik Rumah Tangga",
@@ -174,7 +256,7 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/57534e/FFFFFF?text=Kompos",
             "content": """Pupuk kompos adalah hasil penguraian bahan-bahan organik oleh mikroorganisme. Membuat kompos sendiri adalah cara terbaik untuk mengurangi sampah rumah tangga sekaligus mendapatkan pupuk berkualitas secara gratis.\n\nBahan yang dibutuhkan dibagi menjadi dua kategori:\n1.  **Bahan Hijau (Sumber Nitrogen):** Sisa sayuran, potongan rumput, ampas kopi, kulit buah.\n2.  **Bahan Coklat (Sumber Karbon):** Daun kering, serbuk gergaji, kardus, kertas koran.\n\nCara membuatnya secara sederhana:\n- Siapkan wadah (komposter atau lubang di tanah).\n- Masukkan bahan hijau dan bahan coklat secara berlapis dengan perbandingan sekitar 1:2 (1 bagian hijau, 2 bagian coklat).\n- Jaga agar tumpukan tetap lembab seperti spons yang diperas, jangan terlalu basah atau kering.\n- Aduk tumpukan setiap 1-2 minggu sekali untuk memberikan oksigen bagi mikroorganisme.\n\nDalam waktu 1-3 bulan, kompos akan matang, ditandai dengan warnanya yang coklat kehitaman, berbau seperti tanah, dan suhunya sudah dingin.""",
             "publishedAt": "2022-12-20T10:00:00Z",
-            "source": "LindungiHutan"
+            "source": "LindungiHutan",
         },
         {
             "title": "Jarak Tanam Tomat yang Ideal untuk Hasil Panen Melimpah",
@@ -183,14 +265,14 @@ def get_news_data():
             "imageUrl": "https://placehold.co/600x400/3b82f6/FFFFFF?text=Jarak+Tanam",
             "content": """Jarak tanam adalah salah satu faktor teknis budidaya yang sering disepelekan namun memiliki dampak besar pada pertumbuhan dan hasil panen tomat. Jarak tanam yang terlalu rapat akan menyebabkan beberapa masalah:\n\n- **Persaingan Nutrisi:** Tanaman akan berebut unsur hara, air, dan sinar matahari, sehingga pertumbuhan kerdil.\n- **Sirkulasi Udara Buruk:** Kelembaban di sekitar tanaman menjadi tinggi, menciptakan kondisi ideal bagi perkembangan penyakit jamur.\n- **Sulitnya Perawatan:** Proses penyemprotan, pemangkasan, dan panen menjadi lebih sulit dilakukan.\n\nJarak tanam yang ideal bergantung pada tipe pertumbuhan tomat:\n- **Tipe Determinate (Pendek/Kerdil):** Biasanya cukup dengan jarak 40-50 cm antar tanaman dan 60-70 cm antar baris.\n- **Tipe Indeterminate (Tinggi/Merambat):** Membutuhkan jarak yang lebih lebar, sekitar 60-70 cm antar tanaman dan 80-100 cm antar baris, karena pertumbuhannya yang terus meninggi.""",
             "publishedAt": "2022-11-18T09:00:00Z",
-            "source": "Kampus Tani"
-        }
+            "source": "Kampus Tani",
+        },
     ]
-    
+
     # Menambahkan 'id' unik ke setiap artikel
     articles_with_id = []
     for index, item in enumerate(news_items, start=1):
-        item['id'] = index
+        item["id"] = index
         articles_with_id.append(item)
-        
+
     return articles_with_id

@@ -3,11 +3,14 @@ import os
 import numpy as np
 import tensorflow as tf
 from PIL import Image
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, Header
 from fastapi.responses import JSONResponse
 import logging
 from dotenv import load_dotenv
 from news_service import get_news_data
+import uuid
+from datetime import datetime
+import requests
 
 # Load environment variables dari file .env (jika ada)
 load_dotenv()
@@ -31,11 +34,11 @@ INFORMASI_PENYAKIT = {
         "gejala": "Bercak kecil, basah, berwarna gelap pada daun, batang, dan buah. Bercak pada daun seringkali memiliki lingkaran kuning di sekelilingnya. Penyakit ini tidak bisa disembuhkan.",
         "solusi": "Gunakan benih dan bibit yang bebas penyakit. Lakukan rotasi tanaman 3–4 tahun. Pengendalian berfokus pada pencegahan. Semprotkan bakterisida berbasis tembaga atau kombinasi tembaga–mankozeb segera setelah tanam atau saat gejala pertama muncul. Aplikasikan kembali sesuai interval pada label produk.",
     },
-    "Early_blight": { 
-        "nama_penyakit": "Hawar Dini (Early Blight)", 
-        "penyebab": "Jamur Alternaria solani (juga dikenal sebagai A. tomatophila atau A. linariae).", 
+    "Early_blight": {
+        "nama_penyakit": "Hawar Dini (Early Blight)",
+        "penyebab": "Jamur Alternaria solani (juga dikenal sebagai A. tomatophila atau A. linariae).",
         "gejala": "Munculnya bercak cokelat kering berbentuk konsentris seperti 'papan target' pada daun, batang, dan buah. Biasanya dimulai dari daun-daun bagian bawah.",
-        "solusi": "Gunakan mulsa plastik untuk mencegah percikan spora dari tanah ke daun. Semprotkan fungisida kontak seperti klorotalonil, mankozeb, atau tembaga saat gejala pertama kali muncul, terutama saat cuaca lembap." 
+        "solusi": "Gunakan mulsa plastik untuk mencegah percikan spora dari tanah ke daun. Semprotkan fungisida kontak seperti klorotalonil, mankozeb, atau tembaga saat gejala pertama kali muncul, terutama saat cuaca lembap.",
     },
     "Healthy": {
         "nama_penyakit": "Sehat (Healthy)",
@@ -49,11 +52,11 @@ INFORMASI_PENYAKIT = {
         "gejala": "Bercak basah berwarna hijau gelap hingga keunguan pada daun yang menyebar dengan cepat. Seringkali terdapat lapisan jamur putih di bagian bawah daun. Pada buah, muncul bercak besar berwarna cokelat dan berkeropeng. Penyakit ini sangat destruktif pada suhu sejuk (15–24°C) dan kelembapan tinggi.",
         "solusi": "Lakukan penyemprotan fungisida preventif sebelum gejala muncul, terutama saat musim hujan. Gunakan fungisida kontak seperti klorotalonil atau mankozeb, atau fungisida sistemik seperti kombinasi azoksistrobin+difenokonazol. ",
     },
-    "Leaf_Mold": { 
-        "nama_penyakit": "Kapang Daun (Leaf Mold)", 
-        "penyebab": "Jamur Passalora fulva (sinonim Cladosporium fulvum).", 
-        "gejala": "Umumnya terjadi di rumah kaca atau area dengan kelembapan tinggi. Gejala awal adalah bintik kuning pucat di permukaan atas daun, yang diikuti oleh lapisan jamur berwarna zaitun di bagian bawahnya. Daun yang terinfeksi parah akan menguning dan rontok.", 
-        "solusi": "Tingkatkan sirkulasi udara dengan menjaga jarak tanam dan memangkas tunas air. Hindari membasahi daun dengan menggunakan irigasi tetes. Jika serangan parah, gunakan fungisida seperti klorotalonil atau azoksistrobin+difenokonazol." 
+    "Leaf_Mold": {
+        "nama_penyakit": "Kapang Daun (Leaf Mold)",
+        "penyebab": "Jamur Passalora fulva (sinonim Cladosporium fulvum).",
+        "gejala": "Umumnya terjadi di rumah kaca atau area dengan kelembapan tinggi. Gejala awal adalah bintik kuning pucat di permukaan atas daun, yang diikuti oleh lapisan jamur berwarna zaitun di bagian bawahnya. Daun yang terinfeksi parah akan menguning dan rontok.",
+        "solusi": "Tingkatkan sirkulasi udara dengan menjaga jarak tanam dan memangkas tunas air. Hindari membasahi daun dengan menggunakan irigasi tetes. Jika serangan parah, gunakan fungisida seperti klorotalonil atau azoksistrobin+difenokonazol.",
     },
     "Mosaic_virus": {
         "nama_penyakit": "Virus Mosaic Tomat (Tomato Mosaic Virus)",
@@ -65,7 +68,7 @@ INFORMASI_PENYAKIT = {
         "nama_penyakit": "Bercak Daun Septoria (Septoria Leaf Spot)",
         "penyebab": "Jamur Septoria lycopersici.",
         "gejala": "Munculnya banyak bintik kecil (1-2 mm) berwarna cokelat dengan bagian tengah keabu-abuan dan pinggiran lebih gelap. Penyakit ini biasanya dimulai dari daun paling bawah dan merambat ke atas, menyebabkan daun rontok parah.",
-        "solusi": " Semprot secara berkala dengan fungisida kontak seperti tembaga, klorotalonil, atau mankozeb, terutama saat cuaca lembap."
+        "solusi": " Semprot secara berkala dengan fungisida kontak seperti tembaga, klorotalonil, atau mankozeb, terutama saat cuaca lembap.",
     },
     "Spider_mites": {
         "nama_penyakit": "Hama Tungau (Spider Mites)",
@@ -92,39 +95,70 @@ model = None
 NAMA_KELAS = list(INFORMASI_PENYAKIT.keys())
 UKURAN_INPUT_MODEL = (224, 224)
 
-# --- Fungsi yang Berjalan Saat API Dinyalakan ---
+# --- Validasi JWT Firebase ---
+# FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID')
+# FIREBASE_API_KEY = os.getenv('FIREBASE_API_KEY')
+
+# Fungsi untuk memvalidasi JWT Firebase
+# NB: Untuk production, disarankan validasi public key Google (cryptography).
+# Cara cepat (kurang aman tapi praktis): verifyIdToken via Google REST API
+
+# def verify_firebase_token(authorization: str = Header(...)):
+#     if not authorization.startswith("Bearer "):
+#         raise HTTPException(status_code=401, detail="Token otentikasi tidak ditemukan.")
+#     id_token = authorization.split(" ", 1)[1]
+#     # Verifikasi ke endpoint Google
+#     verify_url = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={FIREBASE_API_KEY}"
+#     headers = {"Content-Type": "application/json"}
+#     body = {"idToken": id_token}
+#     r = requests.post(verify_url, json=body, headers=headers)
+#     if r.status_code != 200 or not r.json().get("users"):
+#         logger.error(f"Firebase JWT tidak valid: {r.text}")
+#         raise HTTPException(status_code=401, detail="Token Firebase tidak valid atau sudah expired.")
+#     return r.json()["users"][0]
+
+
+# --- Fungsi Startup: Load Model ---
 @app.on_event("startup")
 def load_model_on_startup():
     global model
-    model_path = os.getenv('MODEL_PATH', 'model_siap_pakai.keras')
+    model_path = os.getenv("MODEL_PATH", "model_siap_pakai.keras")
     try:
         logger.info(f"Mencoba memuat model dari: {model_path}")
         model = tf.keras.models.load_model(model_path, compile=False)
         logger.info("✅ Model berhasil dimuat.")
     except Exception as e:
         logger.error(f"❌ Gagal memuat model: {e}")
-        raise RuntimeError(f"Tidak dapat memuat model dari {model_path}. Pastikan file ada dan valid.")
+        raise RuntimeError(
+            f"Tidak dapat memuat model dari {model_path}. Pastikan file ada dan valid."
+        )
 
-# --- Fungsi untuk Memproses Gambar ---
+
+# --- Preprocessing Gambar ---
 def preprocess_image(image_bytes: bytes) -> np.ndarray:
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     image = image.resize(UKURAN_INPUT_MODEL)
     image_array = np.array(image) / 255.0
     return np.expand_dims(image_array, axis=0)
 
-# --- Endpoint untuk mengecek status API ---
+
+# --- Endpoint Status ---
 @app.get("/")
 def read_root():
     return {"status": "API Deteksi Penyakit Tomat aktif."}
 
-# --- ENDPOINT UTAMA UNTUK PREDIKSI (DENGAN REVISI) ---
-import uuid
-from datetime import datetime
 
+# --- ENDPOINT UTAMA UNTUK PREDIKSI ---
 @app.post("/predict")
-async def predict_disease(file: UploadFile = File(...)):
+async def predict_disease(
+    file: UploadFile = File(...),
+    # user: dict = Depends(verify_firebase_token)
+):
     if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Tipe file tidak valid. Harap unggah file gambar (JPG, PNG).")
+        raise HTTPException(
+            status_code=400,
+            detail="Tipe file tidak valid. Harap unggah file gambar (JPG, PNG).",
+        )
 
     try:
         image_bytes = await file.read()
@@ -136,11 +170,9 @@ async def predict_disease(file: UploadFile = File(...)):
         informasi_detail = INFORMASI_PENYAKIT.get(predicted_class_internal)
 
         predict_id = str(uuid.uuid4())
-        # indonesian format timestamp
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "Z"
+        timestamp = datetime.utcnow().isoformat() + "Z"
         model_version = "2.0.0"
 
-        # Ambang batas
         MIN_CONFIDENCE = 0.60
         if confidence < MIN_CONFIDENCE:
             return JSONResponse(
@@ -157,28 +189,19 @@ async def predict_disease(file: UploadFile = File(...)):
                         "confidence_str": f"{confidence:.2%}",
                         "gejala": ["Model tidak cukup yakin untuk membuat diagnosis."],
                         "penyebab": "Ini bisa terjadi jika gambar buram, pencahayaan kurang, atau objek bukan daun tomat.",
-                        "solusi": ["Silakan coba ambil foto ulang. Pastikan fokus pada daun yang bergejala dengan pencahayaan yang baik."]
+                        "solusi": [
+                            "Silakan coba ambil foto ulang. Pastikan fokus pada daun yang bergejala dengan pencahayaan yang baik."
+                        ],
                     },
-                    "other_predictions": []
-                }
+                },
             )
 
-        # Ambil top-3 prediksi
-        top3_idx = np.argsort(prediction_scores)[::-1][:3]
-        other_preds = [
-            {
-                "disease_id": NAMA_KELAS[i],
-                "nama_penyakit": INFORMASI_PENYAKIT[NAMA_KELAS[i]]["nama_penyakit"],
-                "confidence": float(prediction_scores[i])
-            }
-            for i in top3_idx if i != predicted_index
-        ]
-
-        # Gejala dan solusi jadi list
         def to_list(text):
             if isinstance(text, list):
                 return text
-            return [t.strip() for t in text.replace('\n', '. ').split('. ') if t.strip()]
+            return [
+                t.strip() for t in text.replace("\n", ". ").split(". ") if t.strip()
+            ]
 
         return JSONResponse(
             status_code=200,
@@ -195,14 +218,15 @@ async def predict_disease(file: UploadFile = File(...)):
                     "gejala": to_list(informasi_detail["gejala"]),
                     "penyebab": informasi_detail["penyebab"],
                     "solusi": to_list(informasi_detail["solusi"]),
-                    "image_url": f"https://appku.com/ilustrasi/{predicted_class_internal}.jpg"
+                    "image_url": f"https://appku.com/ilustrasi/{predicted_class_internal}.jpg",
                 },
-                "other_predictions": other_preds
-            }
+            },
         )
     except Exception as e:
         logger.error(f"Terjadi kesalahan saat prediksi: {e}")
-        raise HTTPException(status_code=500, detail=f"Terjadi kesalahan pada server: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Terjadi kesalahan pada server: {e}"
+        )
 
 
 # --- ENDPOINT BERITA ---
@@ -215,18 +239,19 @@ async def get_news_list():
             "title": news["title"],
             "description": news["description"],
             "imageUrl": news["imageUrl"],
-            "source": news["source"]
-        } 
+            "source": news["source"],
+        }
         for news in all_news
     ]
     return {"status": "success", "data": summary_list}
+
 
 @app.get("/api/news/{news_id}")
 async def get_news_detail(news_id: int):
     all_news = get_news_data()
     target_news = next((news for news in all_news if news["id"] == news_id), None)
-    
     if not target_news:
-        raise HTTPException(status_code=404, detail="Berita dengan ID tersebut tidak ditemukan.")
-    
+        raise HTTPException(
+            status_code=404, detail="Berita dengan ID tersebut tidak ditemukan."
+        )
     return {"status": "success", "data": target_news}
