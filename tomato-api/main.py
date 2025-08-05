@@ -134,7 +134,6 @@ def verify_firebase_token(authorization: str = Header(...)):
         )
 
 
-
 # --- Preprocessing Gambar ---
 def preprocess_image(image_bytes: bytes) -> np.ndarray:
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
@@ -150,11 +149,21 @@ def read_root():
 
 
 # --- ENDPOINT UTAMA UNTUK PREDIKSI ---
+# Maksimal ukuran file adalah 2MB
+MAX_FILE_SIZE = 2 * 1024 * 1024
+
 @app.post("/predict")
 async def predict_disease(
     file: UploadFile = File(...),
     user: dict = Depends(verify_firebase_token)
 ):
+    # Cek ukuran file gambar
+    if file.size > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail="Ukuran file gambar terlalu besar. Maksimal ukuran file adalah 2MB."
+        )
+
     if not file.content_type.startswith("image/"):
         raise HTTPException(
             status_code=400,
