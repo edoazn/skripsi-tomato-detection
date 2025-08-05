@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import io
 import os
 import numpy as np
@@ -21,11 +22,28 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# --- Fungsi Startup: Load Model ---
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global model
+    model_path = os.getenv("MODEL_PATH", "model_siap_pakai.keras")
+    try:
+        logger.info(f"Mencoba memuat model dari: {model_path}")
+        model = tf.keras.models.load_model(model_path, compile=False)
+        logger.info("✅ Model berhasil dimuat.")
+        yield
+    except Exception as e:
+        logger.error(f"❌ Gagal memuat model: {e}")
+        raise RuntimeError(
+            f"Tidak dapat memuat model dari {model_path}. Pastikan file ada dan valid."
+        )
+
 # --- Inisialisasi Aplikasi FastAPI ---
 app = FastAPI(
     title="API Deteksi Penyakit & Berita Tomat",
     description="API untuk menganalisis gambar daun tomat dan menyediakan berita pertanian.",
     version="2.0.0",
+    lifespan=lifespan,
 )
 
 # --- KAMUS INFORMASI PENYAKIT (Data Anda yang sudah sangat baik) ---
@@ -115,20 +133,6 @@ def verify_firebase_token(authorization: str = Header(...)):
             detail="Token Firebase tidak valid atau sudah expired."
         )
 
-# --- Fungsi Startup: Load Model ---
-@app.on_event("startup")
-def load_model_on_startup():
-    global model
-    model_path = os.getenv("MODEL_PATH", "model_siap_pakai.keras")
-    try:
-        logger.info(f"Mencoba memuat model dari: {model_path}")
-        model = tf.keras.models.load_model(model_path, compile=False)
-        logger.info("✅ Model berhasil dimuat.")
-    except Exception as e:
-        logger.error(f"❌ Gagal memuat model: {e}")
-        raise RuntimeError(
-            f"Tidak dapat memuat model dari {model_path}. Pastikan file ada dan valid."
-        )
 
 
 # --- Preprocessing Gambar ---
