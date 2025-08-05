@@ -7,12 +7,14 @@ from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, Header
 from fastapi.responses import JSONResponse
 import logging
 from dotenv import load_dotenv
-from news_service import get_news_data
 import uuid
 from datetime import datetime
-import requests
+import firebase_admin
+from firebase_admin import credentials, auth
+from news_service import get_news_data  
 
-# Load environment variables dari file .env (jika ada)
+
+# Load environment variables dari file .env
 load_dotenv()
 
 # --- Konfigurasi Dasar ---
@@ -95,28 +97,23 @@ model = None
 NAMA_KELAS = list(INFORMASI_PENYAKIT.keys())
 UKURAN_INPUT_MODEL = (224, 224)
 
-# --- Validasi JWT Firebase ---
-# FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID')
-# FIREBASE_API_KEY = os.getenv('FIREBASE_API_KEY')
+# Inisialisasi Firebase Admin dengan file service account
+cred = credentials.Certificate("docmat-app-firebase-adminsdk-key.json")
+firebase_admin.initialize_app(cred)
 
-# Fungsi untuk memvalidasi JWT Firebase
-# NB: Untuk production, disarankan validasi public key Google (cryptography).
-# Cara cepat (kurang aman tapi praktis): verifyIdToken via Google REST API
-
-# def verify_firebase_token(authorization: str = Header(...)):
-#     if not authorization.startswith("Bearer "):
-#         raise HTTPException(status_code=401, detail="Token otentikasi tidak ditemukan.")
-#     id_token = authorization.split(" ", 1)[1]
-#     # Verifikasi ke endpoint Google
-#     verify_url = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={FIREBASE_API_KEY}"
-#     headers = {"Content-Type": "application/json"}
-#     body = {"idToken": id_token}
-#     r = requests.post(verify_url, json=body, headers=headers)
-#     if r.status_code != 200 or not r.json().get("users"):
-#         logger.error(f"Firebase JWT tidak valid: {r.text}")
-#         raise HTTPException(status_code=401, detail="Token Firebase tidak valid atau sudah expired.")
-#     return r.json()["users"][0]
-
+# Fungsi untuk memverifikasi token
+def verify_firebase_token(authorization: str = Header(...)):
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token otentikasi tidak ditemukan.")
+    id_token = authorization.split(" ", 1)[1]
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        return decoded_token
+    except auth.InvalidIdTokenError:
+        raise HTTPException(
+            status_code=401,
+            detail="Token Firebase tidak valid atau sudah expired."
+        )
 
 # --- Fungsi Startup: Load Model ---
 @app.on_event("startup")
@@ -152,7 +149,7 @@ def read_root():
 @app.post("/predict")
 async def predict_disease(
     file: UploadFile = File(...),
-    # user: dict = Depends(verify_firebase_token)
+    user: dict = Depends(verify_firebase_token)
 ):
     if not file.content_type.startswith("image/"):
         raise HTTPException(
@@ -161,8 +158,11 @@ async def predict_disease(
         )
 
     try:
+        # Membaca dan memproses gambar
         image_bytes = await file.read()
         processed_image = preprocess_image(image_bytes)
+        
+        # Melakukan prediksi
         prediction_scores = model.predict(processed_image)[0]
         confidence = float(np.max(prediction_scores))
         predicted_index = np.argmax(prediction_scores)

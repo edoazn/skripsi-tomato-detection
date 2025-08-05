@@ -1,93 +1,100 @@
-# news_service.py
-
-
 def get_news_data():
     """
     Sumber data utama untuk berita. Setiap item berisi konten lengkap.
     """
     news_items = [
         {
+            "id": 1,
             "title": "Kembali Meroket! Harga Tomat Capai Rp 20‑30 rb/kg",
             "description": "Distribusi terganggu dan cuaca menyebabkan harga tomat melonjak tajam.",
             "url": "https://klikpertanian.id/.../harga-tomat-naik-pasar",
             "imageUrl": "https://placehold.co/600x400/f87171/FFFFFF?text=Harga+Tomat",
             "publishedAt": "2025-07-06T00:01:00Z",
             "source": "Klik Pertanian",
-            "content": "Harga tomat naik pesat hingga Rp 20.000‑30.000/kg disebabkan gangguan distribusi dan curah hujan ekstrem.",
+            "content": "Harga tomat naik pesat hingga Rp 20.000‑30.000/kg disebabkan gangguan distribusi dan curah hujan ekstrem. Selain itu, sektor pertanian Indonesia juga menghadapi masalah terkait sistem distribusi yang tidak efisien, memperburuk dampak dari perubahan cuaca. Beberapa daerah penghasil tomat terbesar seperti Malang, Kediri, dan Cirebon mengalami penurunan hasil panen karena curah hujan yang tinggi, yang mempengaruhi kualitas buah dan memperlambat proses distribusi ke pasar-pasar besar. Para petani juga harus menghadapi biaya transportasi yang tinggi dan fluktuasi harga pupuk yang semakin tidak terkontrol. Solusi dari pemerintah yang melibatkan mekanisme subsidi harga dan perbaikan sistem distribusi menjadi kunci agar harga tomat tidak semakin meroket dan dapat terjangkau oleh konsumen.",
         },
         {
+            "id": 2,
             "title": "Tren dan Inovasi Budidaya Tomat di Indonesia 2025",
             "description": "Teknologi dan peran pemerintah dorong produktivitas tomat nasional.",
             "url": "https://estuary.co.id/2025/05/03/perkebunan-tomat-tren",
             "imageUrl": "https://placehold.co/600x400/22c55e/FFFFFF?text=Inovasi",
             "publishedAt": "2025-05-03T00:00:00Z",
             "source": "Estuary.co.id",
-            "content": "Artikel membahas tren produktivitas, inovasi teknologi, dan dukungan pemerintah dalam budidaya tomat.",
+            "content": "Artikel membahas tren produktivitas, inovasi teknologi, dan dukungan pemerintah dalam budidaya tomat. Salah satu tren terbaru adalah penggunaan teknologi hidroponik dan sistem irigasi berbasis sensor yang dapat mengatur kebutuhan air dengan presisi. Ini sangat penting, terutama untuk daerah dengan pasokan air terbatas. Selain itu, riset terbaru menunjukkan bahwa penggunaan varietas tomat hibrida mampu meningkatkan hasil panen hingga 20% dibandingkan dengan varietas tradisional. Peran pemerintah dalam memberikan pelatihan kepada petani dan menyediakan akses kepada teknologi baru sangat penting untuk mendukung keberlanjutan sektor pertanian ini. Diharapkan, dengan meningkatnya penggunaan teknologi modern dan pendekatan pertanian berbasis data, produktivitas tomat di Indonesia dapat meningkat secara signifikan.",
         },
         {
+            "id": 3,
             "title": "Indonesia’s Cherry Tomato Revolution",
             "description": "Penelitian kustumisasi sistem tanam dan irigasi pada varietas tomat ceri.",
             "url": "https://agritechinsights.com/.../cherry-tomato-revolution",
             "imageUrl": "https://placehold.co/600x400/eab308/FFFFFF?text=Cherry+Tomat",
             "publishedAt": "2025-03-26T00:00:00Z",
             "source": "Agritech Insights",
-            "content": "Studi dari Universitas Padjadjaran menunjukkan Fortesa unggul dari Ruby dalam yield dan kualitas.",
+            "content": "Studi dari Universitas Padjadjaran menunjukkan Fortesa unggul dari Ruby dalam yield dan kualitas. Tomat ceri, dengan ukurannya yang kecil dan rasa yang lebih manis, semakin populer di pasar domestik dan ekspor. Penelitian terbaru juga menunjukkan bahwa varietas tomat ceri ini memiliki ketahanan yang lebih baik terhadap penyakit jamur dan hama dibandingkan dengan tomat besar. Selain itu, teknologi irigasi otomatis yang mengatur distribusi air berdasarkan kebutuhan tanaman telah terbukti meningkatkan efisiensi penggunaan air hingga 30%. Ini sangat penting di wilayah yang rentan terhadap kekeringan, seperti beberapa daerah di Nusa Tenggara Timur. Dengan kualitas yang semakin baik dan permintaan pasar yang terus meningkat, tomat ceri di Indonesia diharapkan dapat menjadi komoditas ekspor unggulan.",
         },
         {
-            "title": "Petani Tomat Menjerit: Harga Turun Jadi Rp 1.000/kg",
+            "id": 4,
+            "title": "Petani Tomat Menjerit: Harga Turun Jadi Rp 1.000/kg",
             "description": "Petani di Karo merugi besar akibat harga tomat yang anjlok.",
             "url": "https://cnnindonesia.id/2024/08/02/petani-tomat-menjerit",
             "imageUrl": "https://placehold.co/600x400/facc15/FFFFFF?text=Harga+Turun",
             "publishedAt": "2024-08-02T12:15:00Z",
             "source": "CNN Indonesia",
-            "content": "Harga tomat turun drastis hingga Rp 1.000/kg, petani berharap solusi dari pemerintah.",
+            "content": "Harga tomat turun drastis hingga Rp 1.000/kg, petani berharap solusi dari pemerintah. Penurunan harga ini terjadi akibat lonjakan produksi yang tidak diimbangi dengan permintaan pasar. Banyak petani yang terpaksa membuang hasil panen mereka karena tidak ada yang membeli, sementara biaya produksi tetap tinggi. Di beberapa daerah seperti Karo dan Sumatera Utara, petani bahkan terpaksa menanggung kerugian karena harga tomat yang jatuh terlalu dalam. Pemerintah berusaha mencari solusi jangka panjang melalui program subsidi untuk petani kecil dan penyediaan infrastruktur yang lebih baik untuk distribusi hasil pertanian. Salah satu solusi yang dicoba adalah memperkenalkan pasar alternatif melalui sistem e-commerce yang menghubungkan langsung petani dengan konsumen.",
         },
         {
+            "id": 5,
             "title": "Analisis Keunggulan Kompetitif Tomat RI",
             "description": "Studi PLOS membahas komparatif dan strategi peningkatan ekspor tomat.",
             "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0294980",
             "imageUrl": "https://placehold.co/600x400/84cc16/FFFFFF?text=Ekspor",
             "publishedAt": "2023-11-30T00:00:00Z",
             "source": "PLOS One",
-            "content": "Hasil PAM menunjukkan RI punya keuntungan komparatif tomat di luar Jawa dan potensi ekspor tinggi.",
+            "content": "Hasil PAM menunjukkan RI punya keuntungan komparatif tomat di luar Jawa dan potensi ekspor tinggi. Berdasarkan penelitian terbaru, Indonesia memiliki keunggulan dalam kualitas tomat yang diproduksi di luar pulau Jawa, terutama dari daerah-daerah seperti Bali, Nusa Tenggara Barat, dan Sulawesi. Tomat dari daerah ini tidak hanya memiliki rasa yang lebih manis dan konsistensi yang lebih baik, tetapi juga memiliki ketahanan yang lebih lama dibandingkan dengan tomat yang ditanam di daerah lain. Pemerintah Indonesia kini sedang mengupayakan ekspor tomat ke negara-negara di Asia Tenggara, Timur Tengah, dan Eropa. Dengan dukungan teknologi pertanian yang tepat dan sistem distribusi yang efisien, Indonesia berpotensi menjadi salah satu eksportir utama tomat di dunia.",
         },
         {
+            "id": 6,
             "title": "Sektor Pertanian RI Tumbuh 10.52% di Q1‑2025",
             "description": "Pertanian jadi pendorong utama ekonomi nasional menurut INDEF.",
             "url": "https://www.jakartadaily.id/.../agriculture-growth-q1-2025",
             "imageUrl": "https://placehold.co/600x400/3b82f6/FFFFFF?text=Ekonomi",
             "publishedAt": "2025-05-07T10:00:00Z",
             "source": "Jakarta Daily",
-            "content": "Ekspansi sektor pertanian didorong oleh panen besar padi dan jagung, berdampak positif ke subsektor hortikultura.",
+            "content": "Ekspansi sektor pertanian didorong oleh panen besar padi dan jagung, berdampak positif ke subsektor hortikultura. Indonesia mengalami lonjakan dalam hasil pertanian pada kuartal pertama 2025, dengan sektor pertanian mencatatkan pertumbuhan tahunan sebesar 10.52%. Peningkatan ini terutama berasal dari sektor hortikultura dan tanaman pangan, seperti padi, jagung, dan tomat. Keberhasilan ini juga didorong oleh inovasi dalam teknologi pertanian, seperti penggunaan drone untuk pemantauan tanaman dan sistem irigasi pintar yang menghemat air. Pemerintah Indonesia melalui Kementerian Pertanian juga menargetkan peningkatan ekspor hasil pertanian dalam 5 tahun mendatang, dengan tujuan memperkuat ketahanan pangan domestik serta mengurangi ketergantungan pada impor.",
         },
         {
+            "id": 7,
             "title": "UAV untuk Irigasi dan Monitoring Tomat",
             "description": "Ulasan penggunaan drone di pertanian modern Indonesia.",
             "url": "https://arxiv.org/abs/2301.00379",
             "imageUrl": "https://placehold.co/600x400/a16207/FFFFFF?text=Drone",
             "publishedAt": "2023-01-01T00:00:00Z",
             "source": "ArXiv",
-            "content": "UAV digunakan untuk penyemprotan dan monitoring tanaman tomat, meningkatkan efisiensi dan kontrol hama.",
+            "content": "UAV digunakan untuk penyemprotan dan monitoring tanaman tomat, meningkatkan efisiensi dan kontrol hama. Penggunaan drone (UAV) dalam pertanian modern semakin berkembang, terutama dalam irigasi dan monitoring tanaman. Untuk tanaman tomat, teknologi ini memungkinkan petani untuk mengawasi kondisi tanaman secara real-time, mengidentifikasi area yang membutuhkan irigasi lebih banyak, serta memonitor tingkat kelembapan tanah secara akurat. UAV juga digunakan untuk penyemprotan pestisida dengan lebih efisien, mengurangi pemborosan dan risiko terhadap lingkungan. Dengan penggunaan teknologi ini, petani tidak hanya menghemat waktu dan biaya, tetapi juga dapat meningkatkan hasil panen dengan lebih terkontrol.",
         },
         {
+            "id": 8,
             "title": "Deep Learning untuk Deteksi Penyakit Tomat",
             "description": "Model CNN VGG19 dan Inception v3 mencapai akurasi 94%.",
             "url": "https://arxiv.org/abs/2501.12052",
             "imageUrl": "https://placehold.co/600x400/94a3b8/FFFFFF?text=AI+Deteksi",
             "publishedAt": "2025-01-21T00:00:00Z",
             "source": "Aggrotech Journal",
-            "content": "Model deep learning membantu deteksi penyakit daun tomat secara cepat dan akurat.",
+            "content": "Model deep learning membantu deteksi penyakit daun tomat secara cepat dan akurat. Dalam upaya untuk meningkatkan ketahanan tanaman terhadap penyakit, riset terbaru telah mengembangkan model deep learning berbasis jaringan syaraf konvolusional (CNN), seperti VGG19 dan Inception v3, untuk mendeteksi penyakit pada daun tomat. Model ini telah terbukti mampu mendeteksi gejala penyakit dengan akurasi mencapai 94%. Dengan menggunakan citra digital daun tomat, sistem ini dapat memprediksi penyakit seperti bercak daun atau jamur sebelum gejalanya terlihat jelas, memungkinkan petani untuk melakukan intervensi lebih awal dan mengurangi kerugian akibat penyakit.",
         },
         {
+            "id": 9,
             "title": "Mulsa Superhidrofobik Tingkatkan Produktivitas Tomat",
             "description": "Sand mulch inovatif kurangi penguapan dan tingkatkan hasil panen.",
             "url": "https://arxiv.org/abs/2102.00495",
             "imageUrl": "https://placehold.co/600x400/22c55e/FFFFFF?text=Mulsa",
             "publishedAt": "2021-01-31T00:00:00Z",
             "source": "Environmental Science",
-            "content": "Mulsa pasir superhidrofobik meningkatkan efisiensi air dan hasil tomat di kondisi kering.",
+            "content": "Mulsa pasir superhidrofobik meningkatkan efisiensi air dan hasil tomat di kondisi kering. Mulsa superhidrofobik, yang terbuat dari bahan pasir yang memiliki sifat tahan air, dapat mengurangi penguapan air dari permukaan tanah, menjaga kelembaban tanah lebih lama, dan mencegah gulma tumbuh. Penelitian menunjukkan bahwa penggunaan mulsa ini dapat meningkatkan hasil panen tomat hingga 30% pada daerah dengan kekeringan yang parah. Selain itu, mulsa ini juga membantu menjaga suhu tanah tetap stabil, yang sangat penting dalam menjaga kesehatan akar tanaman tomat. Inovasi ini menjadi solusi yang sangat berguna bagi petani di daerah dengan cuaca panas dan kering.",
         },
         {
+            "id": 10,
             "title": "Penyebab Busuk Buah pada Tomat dan Cara Mengatasinya",
             "description": "Busuk buah menjadi salah satu kendala dalam budidaya tomat. Kondisi ini dapat disebabkan oleh beberapa faktor, salah satunya defisiensi kalsium.",
             "url": "https://www.pertanianku.com/penyebab-busuk-buah-pada-tomat-dan-cara-mengatasinya/",
@@ -97,6 +104,7 @@ def get_news_data():
             "content": """Busuk buah menjadi salah satu kendala dalam budidaya tomat. Kondisi ini dapat disebabkan oleh beberapa faktor, salah satunya defisiensi kalsium. Namun, ada juga faktor lain seperti serangan jamur patogen yang bisa menyebabkan buah tomat menjadi busuk.\n\nGejala busuk buah akibat kekurangan kalsium biasanya dimulai dengan munculnya bercak kecil berwarna coklat kehitaman di bagian bawah buah (blossom-end rot). Bercak ini akan semakin membesar dan melekuk seiring dengan perkembangan buah. Kondisi ini sering terjadi saat musim kemarau atau ketika penyiraman tidak teratur.\n\nSementara itu, busuk buah akibat jamur (anthracnose) biasanya ditandai dengan bercak basah yang melingkar dan sedikit tertekan pada permukaan buah. Seiring waktu, bercak ini akan membesar dan seringkali muncul titik-titik hitam di tengahnya yang merupakan badan buah jamur. Penyakit ini cepat menyebar pada kondisi cuaca yang lembab dan hangat.\n\nUntuk mengatasinya, pastikan tanaman mendapatkan suplai kalsium yang cukup dengan memberikan pupuk yang mengandung kalsium atau pengapuran pada tanah sebelum tanam. Jaga kelembaban tanah dengan penyiraman yang teratur dan gunakan mulsa untuk mengurangi penguapan. Untuk pencegahan jamur, lakukan penyemprotan fungisida secara berkala dan jaga kebersihan kebun dari sisa-sisa tanaman yang terinfeksi.""",
         },
         {
+            "id": 11,
             "title": "Cara Mengendalikan Penyakit Bercak Daun pada Tanaman Tomat",
             "description": "Penyakit bercak daun merupakan salah satu penyakit yang sering menyerang tanaman tomat. Penyakit ini disebabkan oleh jamur Cercospora capsici.",
             "url": "https://distan.bulelengkab.go.id/informasi/detail/artikel/cara-mengendalikan-penyakit-bercak-daun-pada-tanaman-tomat-89",
@@ -106,6 +114,7 @@ def get_news_data():
             "content": """Penyakit bercak daun merupakan salah satu penyakit yang sering menyerang tanaman tomat. Penyakit ini disebabkan oleh jamur Cercospora capsici. Gejala awal ditandai dengan adanya bercak kecil, bulat, berair pada daun. Bercak tersebut kemudian berkembang menjadi lebih besar, dengan diameter mencapai 0,5 cm, berwarna putih atau abu-abu di bagian tengahnya, dan dikelilingi oleh tepi berwarna coklat tua.\n\nSerangan berat dapat menyebabkan daun menguning, kering, dan akhirnya rontok sebelum waktunya. Kondisi ini tentu akan menghambat proses fotosintesis dan menurunkan produktivitas tanaman secara signifikan. Penyakit ini berkembang pesat pada suhu hangat (25-30°C) dan kelembaban udara yang tinggi.\n\nPengendalian dapat dilakukan dengan beberapa cara:\n1.  **Kultur Teknis:** Lakukan rotasi tanaman dengan tanaman yang bukan inang jamur. Jaga kebersihan kebun dan musnahkan sisa-sisa tanaman yang terinfeksi.\n2.  **Pengendalian Hayati:** Manfaatkan agens hayati seperti jamur Trichoderma sp. atau bakteri Pseudomonas fluorescens.\n3.  **Pengendalian Kimiawi:** Jika serangan sudah parah, gunakan fungisida dengan bahan aktif seperti mankozeb, klorotalonil, atau propineb. Lakukan penyemprotan sesuai dosis anjuran.""",
         },
         {
+            "id": 12,
             "title": "Mengenal Hama Kutu Kebul, Vektor Virus Keriting pada Tomat",
             "description": "Kutu kebul (Bemisia tabaci) sangat merugikan karena kemampuannya menjadi vektor virus kuning keriting yang berbahaya bagi tanaman tomat.",
             "url": "https://www.litbang.pertanian.go.id/info-teknologi/2943/",
@@ -115,6 +124,7 @@ def get_news_data():
             "content": """Kutu kebul (Bemisia tabaci) adalah serangga kecil berwarna putih yang sering ditemukan bergerombol di bagian bawah daun. Meskipun ukurannya kecil, hama ini sangat berbahaya karena dua alasan utama: pertama, ia menghisap cairan tanaman yang menyebabkan daun menjadi keriput dan pertumbuhan terhambat. Kedua, dan yang paling merusak, kutu kebul adalah vektor utama penyebaran Tomato Yellow Leaf Curl Virus (TYLCV) atau Virus Keriting Daun Kuning.\n\nVirus ini tidak bisa disembuhkan dan menyebabkan kerugian panen total. Oleh karena itu, pengendalian kutu kebul adalah kunci utama. Beberapa metode pengendalian yang efektif meliputi:\n\n- **Fisik/Mekanis:** Memasang perangkap perekat kuning (yellow sticky traps) di sekitar tanaman untuk menarik dan menjebak kutu kebul dewasa.\n- **Kimiawi:** Menggunakan insektisida dengan bahan aktif seperti abamektin, tiametoksam, atau imidakloprid. Lakukan rotasi bahan aktif untuk mencegah resistensi hama.\n- **Hayati:** Memanfaatkan musuh alami seperti predator kumbang koksi atau parasitoid Encarsia formosa.""",
         },
         {
+            "id": 13,
             "title": "Teknik Budidaya Tomat Dataran Rendah Agar Panen Melimpah",
             "description": "Dengan teknik yang tepat, budidaya tomat di dataran rendah juga bisa menghasilkan panen yang optimal. Simak tips dan triknya di sini.",
             "url": "https://tabloidsinartani.com/detail/berita/0/gaya-hidup/19128/Teknik-Budidaya-Tomat-Dataran-Rendah-Agar-Panen-Melimpah",
@@ -124,6 +134,7 @@ def get_news_data():
             "content": """Budidaya tomat di dataran rendah memiliki tantangan tersendiri, terutama suhu udara yang lebih tinggi dan kelembapan yang dapat memicu penyakit. Namun, dengan beberapa penyesuaian teknis, panen melimpah tetap bisa dicapai.\n\nBerikut adalah beberapa kunci suksesnya:\n\n1.  **Pemilihan Varietas:** Pilih varietas tomat yang toleran terhadap suhu panas. Beberapa varietas hibrida seperti Servo, Tymoti, atau Betavila dikenal memiliki adaptasi yang baik di dataran rendah.\n2.  **Pengaturan Waktu Tanam:** Hindari menanam di puncak musim hujan untuk mengurangi risiko serangan jamur. Awal atau akhir musim kemarau seringkali menjadi waktu yang lebih ideal.\n3.  **Irigasi yang Tepat:** Gunakan sistem irigasi tetes untuk menjaga kelembapan tanah tetap stabil tanpa membasahi daun, yang dapat mengurangi risiko penyakit daun.\n4.  **Sirkulasi Udara:** Berikan jarak tanam yang cukup (misalnya 60x70 cm) dan lakukan pemangkasan tunas air secara rutin untuk memastikan sirkulasi udara lancar di sekitar tanaman.""",
         },
         {
+            "id": 14,
             "title": "Pentingnya Pemupukan Berimbang pada Tanaman Tomat",
             "description": "Pemupukan berimbang adalah pemberian pupuk sesuai dengan kebutuhan tanaman dan kondisi lahan untuk meningkatkan produksi dan menjaga kesuburan tanah.",
             "url": "https://cybex.pertanian.go.id/artikel/99243/pemupukan-berimbang-pada-tanaman-tomat/",
@@ -133,6 +144,7 @@ def get_news_data():
             "source": "Cybex Pertanian",
         },
         {
+            "id": 15,
             "title": "Cara Mengatasi Serangan Virus Gemini (Kuning) pada Tomat",
             "description": "Virus gemini menjadi momok bagi petani cabai dan tomat. Pengendaliannya harus fokus pada serangga vektornya, yaitu kutu kebul.",
             "url": "https://kabartani.com/cara-mengatasi-serangan-virus-gemini-pada-tanaman-cabai-dan-tomat.html",
@@ -142,6 +154,7 @@ def get_news_data():
             "source": "Kabar Tani",
         },
         {
+            "id": 16,
             "title": "Manfaat Mulsa Plastik untuk Budidaya Tanaman Tomat",
             "description": "Penggunaan mulsa plastik hitam perak dapat menekan pertumbuhan gulma, menjaga kelembaban tanah, dan mengurangi serangan hama.",
             "url": "https://paktanidigital.com/artikel/manfaat-mulsa-plastik-untuk-budidaya-tanaman-tomat/",
@@ -151,6 +164,7 @@ def get_news_data():
             "source": "Pak Tani Digital",
         },
         {
+            "id": 17,
             "title": "Pengendalian Hama Lalat Buah yang Menyerang Tomat",
             "description": "Lalat buah merupakan hama utama yang menyebabkan buah menjadi busuk dan rontok. Pelajari cara pengendaliannya secara efektif.",
             "url": "https://distan.jogjaprov.go.id/pengendalian-hama-lalat-buah/",
@@ -160,6 +174,7 @@ def get_news_data():
             "source": "DPKPP DIY",
         },
         {
+            "id": 18,
             "title": "Cara Membuat Pestisida Nabati dari Bawang Putih",
             "description": "Pestisida nabati adalah alternatif ramah lingkungan untuk mengendalikan hama. Bawang putih efektif untuk mengusir hama seperti kutu daun.",
             "url": "https://dlh.semarangkota.go.id/cara-membuat-pestisida-nabati-dari-bawang-putih/",
@@ -169,6 +184,7 @@ def get_news_data():
             "source": "DLH Semarang",
         },
         {
+            "id": 19,
             "title": "Pengendalian Penyakit Layu Fusarium pada Tomat",
             "description": "Layu fusarium adalah penyakit tular tanah yang sulit dikendalikan. Pencegahan adalah kunci utama, salah satunya dengan sanitasi lahan.",
             "url": "https://pertanian.pontianakkota.go.id/artikel/61-pengendalian-penyakit-layu-fusarium.html",
@@ -178,6 +194,7 @@ def get_news_data():
             "source": "Dinas Pertanian Pontianak",
         },
         {
+            "id": 20,
             "title": "5 Tanda Tomat Siap Panen, Apa Saja?",
             "description": "Memanen tomat pada waktu yang tepat sangat penting untuk mendapatkan rasa dan kualitas terbaik. Kenali tanda-tandanya.",
             "url": "https://www.kompas.com/homey/read/2023/08/14/192700876/5-tanda-tomat-siap-panen-apa-saja-",
@@ -187,6 +204,7 @@ def get_news_data():
             "source": "Kompas.com",
         },
         {
+            "id": 21,
             "title": "Budidaya Tomat Hidroponik, Peluang Usaha yang Menggiurkan",
             "description": "Bertanam tomat tanpa tanah? Hidroponik adalah jawabannya. Metode ini bisa menjadi solusi untuk lahan sempit di perkotaan.",
             "url": "https://www.pertanian.go.id/home/?show=news&act=view&id=5229",
@@ -196,6 +214,7 @@ def get_news_data():
             "source": "Kementerian Pertanian RI",
         },
         {
+            "id": 22,
             "title": "Pengendalian Penyakit Layu Bakteri pada Tanaman Tomat",
             "description": "Penyakit layu bakteri disebabkan oleh Ralstonia solanacearum dan menyebar dengan cepat. Pelajari cara mengidentifikasi dan mengendalikannya.",
             "url": "https://cybex.pertanian.go.id/artikel/98501/pengendalian-penyakit-layu-bakteri-ralstonia-solanacearum-pada-tanaman-tomat/",
@@ -205,6 +224,7 @@ def get_news_data():
             "source": "Cybex Pertanian",
         },
         {
+            "id": 23,
             "title": "Mengenal Varietas Tomat Unggul Tahan Virus Gemini",
             "description": "Pemilihan varietas yang tahan penyakit adalah langkah awal yang krusial. Beberapa varietas tomat telah dirancang untuk tahan terhadap serangan virus gemini.",
             "url": "https://distanpangan.baliprov.go.id/mengenal-varietas-tomat-unggul-tahan-virus-gemini/",
@@ -214,6 +234,7 @@ def get_news_data():
             "source": "Distan Pangan Bali",
         },
         {
+            "id": 24,
             "title": "Penyebab Bunga Tomat Rontok dan Cara Mengatasinya",
             "description": "Bunga rontok adalah masalah umum yang menyebabkan gagal panen. Faktor cuaca ekstrem dan kekurangan nutrisi bisa menjadi penyebabnya.",
             "url": "https://mitalom.com/penyebab-bunga-tomat-rontok-dan-cara-mengatasinya/",
@@ -223,6 +244,7 @@ def get_news_data():
             "source": "Mitalom.com",
         },
         {
+            "id": 25,
             "title": "Manfaat dan Cara Pengapuran Lahan Pertanian",
             "description": "Tanah yang terlalu masam dapat menghambat penyerapan nutrisi oleh tanaman tomat. Pengapuran dengan dolomit adalah solusinya.",
             "url": "https://dinaspertanian.wonosobokab.go.id/manfaat-dan-cara-pengapuran-lahan-pertanian/",
@@ -232,6 +254,7 @@ def get_news_data():
             "source": "Dinas Pertanian Wonosobo",
         },
         {
+            "id": 26,
             "title": "Cara Memangkas Tunas Air pada Tanaman Tomat agar Berbuah Lebat",
             "description": "Pemangkasan tunas air (wiwil) bertujuan untuk memfokuskan energi tanaman pada pembentukan buah, bukan pada pertumbuhan vegetatif yang berlebihan.",
             "url": "https://kumparan.com/seputar-hobi/cara-memangkas-tunas-air-pada-tanaman-tomat-agar-berbuah-lebat-21sXh5w02xH",
@@ -241,6 +264,7 @@ def get_news_data():
             "source": "Kumparan",
         },
         {
+            "id": 27,
             "title": "Hawar Daun Alternaria (Hawar Dini) pada Tomat",
             "description": "Penyakit ini biasanya menyerang daun tua terlebih dahulu dan ditandai dengan bercak konsentris seperti papan target. Pelajari siklus hidup dan pengendaliannya.",
             "url": "https://plantix.net/id/library/plant-diseases/100033/alternaria-blight/",
@@ -250,6 +274,7 @@ def get_news_data():
             "source": "Plantix",
         },
         {
+            "id": 28,
             "title": "Cara Membuat Pupuk Kompos dari Sampah Organik Rumah Tangga",
             "description": "Manfaatkan sampah dapur Anda untuk membuat pupuk kompos yang kaya nutrisi. Ini adalah cara mudah dan murah untuk menyuburkan tanaman tomat Anda.",
             "url": "https://lindungihutan.com/blog/cara-membuat-pupuk-kompos/",
@@ -259,6 +284,7 @@ def get_news_data():
             "source": "LindungiHutan",
         },
         {
+            "id": 29,
             "title": "Jarak Tanam Tomat yang Ideal untuk Hasil Panen Melimpah",
             "description": "Mengatur jarak tanam yang tepat akan mempengaruhi sirkulasi udara, paparan sinar matahari, dan pada akhirnya, jumlah dan kualitas buah yang dihasilkan.",
             "url": "https://kampustani.com/jarak-tanam-tomat/",
@@ -267,8 +293,17 @@ def get_news_data():
             "publishedAt": "2022-11-18T09:00:00Z",
             "source": "Kampus Tani",
         },
+        {
+            "id": 30,
+            "title": "Cara Mengatasi Penyakit Busuk Buah pada Tomat",
+            "description": "Busuk buah adalah penyakit yang sering menyerang tomat, terutama saat musim hujan. Pelajari cara pencegahan dan pengendaliannya.",
+            "url": "https://www.pertanian.go.id/home/?show=news&act=view&id=5201",
+            "imageUrl": "https://placehold.co/600x400/ef4444/FFFFFF?text=Busuk+Buah",
+            "content": """Penyakit busuk buah pada tomat disebabkan oleh beberapa faktor, termasuk infeksi jamur seperti Phytophthora infestans atau Botrytis cinerea. Gejala awalnya adalah munculnya bercak-bercak basah pada buah yang kemudian membesar dan berubah menjadi busuk.\n\nPenyebab utama penyakit ini adalah kelembaban tinggi, terutama saat musim hujan. Oleh karena itu, pencegahan adalah langkah terbaik:\n- **Sirkulasi Udara Baik:** Pastikan jarak tanam cukup untuk sirkulasi udara yang baik.\n- **Pengairan yang Tepat:** Hindari penyiraman dari atas yang membasahi daun dan buah.\n- **Sanitasi Kebun:** Hapus buah-buah yang sudah terinfeksi untuk mencegah penyebaran.\n- **Fungisida:** Gunakan fungisida berbahan aktif seperti mankozeb atau klorotalonil secara preventif.""",
+            "publishedAt": "2022-10-05T08:00:00Z",
+            "source": "Kementerian Pertanian RI",
+        },
     ]
-
     # Menambahkan 'id' unik ke setiap artikel
     articles_with_id = []
     for index, item in enumerate(news_items, start=1):
