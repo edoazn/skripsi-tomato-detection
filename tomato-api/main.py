@@ -12,7 +12,8 @@ import uuid
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, auth
-from news_service import get_news_data  
+from fastapi import Query
+from news_service import get_news_data
 
 
 # Load environment variables dari file .env
@@ -21,6 +22,7 @@ load_dotenv()
 # --- Konfigurasi Dasar ---
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 # --- Fungsi Startup: Load Model ---
 @asynccontextmanager
@@ -37,6 +39,7 @@ async def lifespan(app: FastAPI):
         raise RuntimeError(
             f"Tidak dapat memuat model dari {model_path}. Pastikan file ada dan valid."
         )
+
 
 # --- Inisialisasi Aplikasi FastAPI ---
 app = FastAPI(
@@ -119,6 +122,7 @@ UKURAN_INPUT_MODEL = (224, 224)
 cred = credentials.Certificate("docmat-app-firebase-adminsdk-key.json")
 firebase_admin.initialize_app(cred)
 
+
 # Fungsi untuk memverifikasi token
 def verify_firebase_token(authorization: str = Header(...)):
     if not authorization.startswith("Bearer "):
@@ -129,8 +133,7 @@ def verify_firebase_token(authorization: str = Header(...)):
         return decoded_token
     except auth.InvalidIdTokenError:
         raise HTTPException(
-            status_code=401,
-            detail="Token Firebase tidak valid atau sudah expired."
+            status_code=401, detail="Token Firebase tidak valid atau sudah expired."
         )
 
 
@@ -152,16 +155,16 @@ def read_root():
 # Maksimal ukuran file adalah 2MB
 MAX_FILE_SIZE = 2 * 1024 * 1024
 
+
 @app.post("/predict")
 async def predict_disease(
-    file: UploadFile = File(...),
-    user: dict = Depends(verify_firebase_token)
+    file: UploadFile = File(...), user: dict = Depends(verify_firebase_token)
 ):
     # Cek ukuran file gambar
     if file.size > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=400,
-            detail="Ukuran file gambar terlalu besar. Maksimal ukuran file adalah 2MB."
+            detail="Ukuran file gambar terlalu besar. Maksimal ukuran file adalah 2MB.",
         )
 
     if not file.content_type.startswith("image/"):
@@ -174,7 +177,7 @@ async def predict_disease(
         # Membaca dan memproses gambar
         image_bytes = await file.read()
         processed_image = preprocess_image(image_bytes)
-        
+
         # Melakukan prediksi
         prediction_scores = model.predict(processed_image)[0]
         confidence = float(np.max(prediction_scores))
@@ -243,6 +246,7 @@ async def predict_disease(
 
 
 # --- ENDPOINT BERITA ---
+# Endpoint untuk mendapatkan daftar berita
 @app.get("/api/news")
 async def get_news_list():
     all_news = get_news_data()
@@ -259,6 +263,26 @@ async def get_news_list():
     return {"status": "success", "data": summary_list}
 
 
+# Endpoint untuk mencari berita berdasarkan kata kunci
+@app.get("/api/news/search")
+async def search_news(
+    keyword: str = Query(
+        ..., min_length=3, max_length=100, description="Kata kunci pencarian berita"
+    )
+):
+    all_news = get_news_data()
+    filtered_news = [
+        news for news in all_news if keyword.lower() in news["title"].lower()
+    ]
+    if not filtered_news:
+        raise HTTPException(
+            status_code=404,
+            detail="Tidak ada berita yang ditemukan dengan kata kunci tersebut.",
+        )
+    return {"status": "success", "data": filtered_news}
+
+
+# Endpoint untuk mendapatkan detail berita berdasarkan ID
 @app.get("/api/news/{news_id}")
 async def get_news_detail(news_id: int):
     all_news = get_news_data()
@@ -268,3 +292,15 @@ async def get_news_detail(news_id: int):
             status_code=404, detail="Berita dengan ID tersebut tidak ditemukan."
         )
     return {"status": "success", "data": target_news}
+
+
+# Endpoint untuk mendapatkan berita terkait berdasarkan id dan kategori
+@app.get("/api/news/{news_id}/related")
+async def related_news(news_id: int):
+    items = get_news_data()
+    target = next((n for n in items if n["id"] == news_id), None)
+    if not target:
+        raise HTTPException(404, "News not found")
+    cat = target.get("category")
+    related = [n for n in items if n["id"] != news_id and n.get("category") == cat]
+    return {"status": "success", "data": related[:5]}
