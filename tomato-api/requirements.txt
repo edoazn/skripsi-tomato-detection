@@ -1,6 +1,10 @@
 fastapi
 uvicorn[standard]
-tensorflow
+tensorflow==2.19.0
 numpy
 Pillow
 python-multipart
+firebase-admin
+python-dotenv
+requests
+pydantic
