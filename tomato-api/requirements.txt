@@ -1,6 +1,5 @@
 fastapi
-uvicorn[standard]
-gunicorn
+uvicorn
 tensorflow==2.19.0
 numpy
 Pillow

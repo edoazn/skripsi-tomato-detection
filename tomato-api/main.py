@@ -19,6 +19,13 @@ from news_service import get_news_data
 # Load environment variables dari file .env
 load_dotenv()
 
+# Mengambil port dari environment variable atau gunakan default 8000
+port = os.getenv("PORT", 8000)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(port))
+
 # --- Konfigurasi Dasar ---
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
