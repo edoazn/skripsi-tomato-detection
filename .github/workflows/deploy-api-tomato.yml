@@ -25,11 +25,11 @@ env:
 
 on:
   push:
-    branches: 
+    branches:
       - main
     paths:
-      - 'api-tomato/**'
-      - '.github/workflows/deploy-api-tomato.yml'
+      - 'tomato-api/**'
+      - '.github/workflows/deploy-api.yml'
   workflow_dispatch:
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./api-tomato
+        working-directory: ./tomato-api
 
     steps:
       - uses: actions/checkout@v4
@@ -54,21 +54,16 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Upload artifact for deployment
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+          path: ./tomato-api
 
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
       # - name: Run tests
       #   run: |
-      #     cd api-tomato
-      #     source venv/bin/activate
       #     pytest
-
-      - name: Upload artifact for deployment jobs
-        uses: actions/upload-artifact@v4
-        with:
-          name: python-app
-          path: |
-            api-tomato
-            !api-tomato/venv/
 
   deploy:
     permissions:
@@ -92,4 +87,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./api-tomato
+          package: ./tomato-api
