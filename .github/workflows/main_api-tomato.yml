@@ -29,7 +29,7 @@ on:
       - main
     paths:
       - 'tomato-api/**'
-      - '.github/workflows/deploy-api.yml'
+      - '.github/workflows/main_api-tomato.yml'
   workflow_dispatch:
 
 permissions:
