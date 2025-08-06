@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: ./tomato-api
+          path: .
 
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
       # - name: Run tests
@@ -87,4 +87,4 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./tomato-api
+          package: .
