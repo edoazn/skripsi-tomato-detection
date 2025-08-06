@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global model
-    model_path = os.getenv("MODEL_PATH", "model_siap_pakai.keras")
+    model_path = os.getenv("MODEL_PATH", "model_tomat_final_untuk_deploy.keras")
     try:
         logger.info(f"Mencoba memuat model dari: {model_path}")
         model = tf.keras.models.load_model(model_path, compile=False)
