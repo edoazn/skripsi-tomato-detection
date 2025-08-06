@@ -22,9 +22,6 @@ load_dotenv()
 # Mengambil port dari environment variable atau gunakan default 8000
 port = os.getenv("PORT", 8000)
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=int(port))
 
 # --- Konfigurasi Dasar ---
 logging.basicConfig(level=logging.INFO)
@@ -55,6 +52,10 @@ app = FastAPI(
     version="2.0.0",
     lifespan=lifespan,
 )
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(port))
 
 # --- KAMUS INFORMASI PENYAKIT (Data Anda yang sudah sangat baik) ---
 INFORMASI_PENYAKIT = {
