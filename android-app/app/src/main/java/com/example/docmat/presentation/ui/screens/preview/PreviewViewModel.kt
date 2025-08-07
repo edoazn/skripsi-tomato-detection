@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.docmat.data.remote.api.TomatoApiService
 import com.example.docmat.data.remote.mapper.toDomain
+import com.example.docmat.data.repository.HistoryRepository
+import com.example.docmat.domain.model.HistoryItem
 import com.example.docmat.domain.model.PredictionResult
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +31,8 @@ import java.io.ByteArrayOutputStream
 
 @HiltViewModel
 class PreviewViewModel @Inject constructor(
-    private val apiService: TomatoApiService
+    private val apiService: TomatoApiService,
+    private val historyRepository: HistoryRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PreviewUiState())
@@ -83,6 +86,9 @@ class PreviewViewModel @Inject constructor(
                     val predictionResponse = response.body()
                     if (predictionResponse != null) {
                         val predictionResult = predictionResponse.toDomain()
+                        
+                        // Save to history
+                        saveToHistory(predictionResult, imageUri.toString())
                         
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
@@ -140,6 +146,32 @@ class PreviewViewModel @Inject constructor(
      */
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
+    }
+    
+    /**
+     * Save prediction result to history
+     */
+    private fun saveToHistory(predictionResult: PredictionResult, localImageUri: String) {
+        viewModelScope.launch {
+            try {
+                val user = FirebaseAuth.getInstance().currentUser
+                val userId = user?.uid ?: return@launch
+                
+                val historyItem = HistoryItem.fromPredictionResult(
+                    predictionResult = predictionResult,
+                    userId = userId,
+                    localImageUri = localImageUri
+                )
+                
+                historyRepository.saveToHistory(historyItem)
+                    .onFailure { error ->
+                        // Log error but don't show to user (non-critical)
+                        android.util.Log.e("PreviewViewModel", "Failed to save to history: ${error.message}")
+                    }
+            } catch (e: Exception) {
+                android.util.Log.e("PreviewViewModel", "Exception saving to history: ${e.message}")
+            }
+        }
     }
 
     /**

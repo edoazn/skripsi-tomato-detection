@@ -180,34 +180,55 @@ private fun ScanSection(
     onScanClick: () -> Unit,
     buttonColors: ButtonColors
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(colorScheme.onSecondaryContainer)
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Analisa Tomat anda",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = colorScheme.onPrimary,
-            modifier = Modifier.padding(bottom = 8.dp)
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = colorScheme.surfaceVariant.copy(alpha = 0.3f)
         )
-        Button(
-            onClick = onScanClick,
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
-            shape = MaterialTheme.shapes.large,
-            colors = buttonColors
+                .padding(20.dp)
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_camera),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
+            Text(
+                text = "🍅 Analisa Tomat Anda",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 4.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Scan Document")
+            
+            Text(
+                text = "Deteksi penyakit pada daun tomat dengan AI",
+                fontSize = 14.sp,
+                color = colorScheme.onSurface.copy(alpha = 0.7f),
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            
+            Button(
+                onClick = onScanClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = MaterialTheme.shapes.large,
+                colors = buttonColors(
+                    containerColor = colorScheme.primary,
+                    contentColor = colorScheme.onPrimary
+                )
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_camera),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Mulai Analisa",
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }

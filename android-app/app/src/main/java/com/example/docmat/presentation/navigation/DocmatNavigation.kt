@@ -166,9 +166,27 @@ fun DocmatNavigation(
 
             composable(DocmatScreens.History.route) {
                 HistoryScreen(
-                    viewModel = historyViewModel,
-                    onNavigateToDetail = { historyItem ->
-                        // TODO: Navigate to detail screen
+                    onNavigateToDetail = { historyItem, imageUri ->
+                        try {
+                            val predictionResult = historyItem.toPredictionResult()
+                            val encodedImageUri = Uri.encode(imageUri)
+                            
+                            // Use Base64 encoding untuk avoid JSON escaping issues
+                            val jsonString = com.google.gson.Gson().toJson(predictionResult)
+                            val base64Json = Base64.encodeToString(
+                                jsonString.toByteArray(Charsets.UTF_8), 
+                                Base64.URL_SAFE or Base64.NO_WRAP
+                            )
+                            
+                            navController.navigate(
+                                DocmatScreens.DetailResult.createRoute(base64Json, encodedImageUri)
+                            )
+                        } catch (e: Exception) {
+                            android.util.Log.e("Navigation", "Failed to serialize result: ${e.message}")
+                        }
+                    },
+                    onBackClick = {
+                        navController.popBackStack()
                     }
                 )
             }

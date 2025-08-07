@@ -1,53 +1,174 @@
 package com.example.docmat.presentation.ui.screens.history
 
 import androidx.lifecycle.ViewModel
-import com.example.docmat.domain.model.History
+import androidx.lifecycle.viewModelScope
+import com.example.docmat.data.repository.HistoryRepository
+import com.example.docmat.domain.model.HistoryItem
+import com.example.docmat.domain.model.PredictionResult
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HistoryViewModel: ViewModel() {
-    private val _history = MutableStateFlow<List<History>>(emptyList())
-    val history = _history.asStateFlow()
-
-
+@HiltViewModel
+class HistoryViewModel @Inject constructor(
+    private val historyRepository: HistoryRepository
+) : ViewModel() {
+    
+    private val _uiState = MutableStateFlow(HistoryUiState())
+    val uiState: StateFlow<HistoryUiState> = _uiState.asStateFlow()
+    
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+    
     init {
-        // Temporary mock data
-        _history.value = listOf(
-            History(
-                id = "1",
-                scanResult = "Tomato Disease Detected",
-                timestamp = "2023-10-01 10:00:00",
-                description = "Leaf spot disease detected in tomato plants.",
-                imageUrl = "https://example.com/tomato_disease.jpg"
-            ),
-            History(
-                id = "2",
-                scanResult = "Healthy Tomato Plants",
-                timestamp = "2023-10-02 11:30:00",
-                description = "No diseases detected in tomato plants.",
-                imageUrl = "https://example.com/healthy_tomato.jpg"
-            ),
-            History(
-                id = "3",
-                scanResult = "Tomato Blight Warning",
-                timestamp = "2023-10-03 14:15:00",
-                description = "Blight detected in tomato plants. Immediate action required.",
-                imageUrl = "https://example.com/tomato_blight.jpg"
-            ),
-            History(
-                id = "4",
-                scanResult = "Tomato Pest Alert",
-                timestamp = "2023-10-04 09:45:00",
-                description = "Pest infestation detected in tomato plants.",
-                imageUrl = "https://example.com/tomato_pest.jpg"
-            ),
-            History(
-                id = "5",
-                scanResult = "Tomato Growth Monitoring",
-                timestamp = "2023-10-05 16:20:00",
-                description = "Regular monitoring of tomato plant growth.",
-                imageUrl = "https://example.com/tomato_growth.jpg"
-            )
-        )
+        loadHistory()
     }
+    
+    /**
+     * Load user's prediction history
+     */
+    private fun loadHistory() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            
+            historyRepository.getHistoryFlow()
+                .catch { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = error.message ?: "Gagal memuat riwayat"
+                    )
+                }
+                .collect { historyItems ->
+                    _uiState.value = _uiState.value.copy(
+                        historyItems = historyItems,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+        }
+    }
+    
+    /**
+     * Save prediction result to history
+     */
+    fun saveToHistory(predictionResult: PredictionResult, localImageUri: String) {
+        viewModelScope.launch {
+            val userId = "current_user" // Will be replaced with actual userId from auth
+            val historyItem = HistoryItem.fromPredictionResult(
+                predictionResult = predictionResult,
+                userId = userId,
+                localImageUri = localImageUri
+            )
+            
+            historyRepository.saveToHistory(historyItem)
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        error = "Gagal menyimpan ke riwayat: ${error.message}"
+                    )
+                }
+        }
+    }
+    
+    /**
+     * Delete history item
+     */
+    fun deleteHistoryItem(itemId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            
+            historyRepository.deleteHistoryItem(itemId)
+                .onSuccess {
+                    // History will be automatically updated via Flow
+                    clearError()
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = "Gagal menghapus item: ${error.message}"
+                    )
+                }
+        }
+    }
+    
+    /**
+     * Search history
+     */
+    fun searchHistory(query: String) {
+        _searchQuery.value = query
+        
+        if (query.isBlank()) {
+            loadHistory()
+            return
+        }
+        
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            
+            historyRepository.searchHistory(query)
+                .catch { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = error.message ?: "Gagal mencari riwayat"
+                    )
+                }
+                .collect { historyItems ->
+                    _uiState.value = _uiState.value.copy(
+                        historyItems = historyItems,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+        }
+    }
+    
+    /**
+     * Clear search and reload all history
+     */
+    fun clearSearch() {
+        _searchQuery.value = ""
+        loadHistory()
+    }
+    
+    /**
+     * Refresh history
+     */
+    fun refresh() {
+        loadHistory()
+    }
+    
+    /**
+     * Clear error message
+     */
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
+    }
+    
+    /**
+     * Get history statistics
+     */
+    fun getHistoryStats() {
+        viewModelScope.launch {
+            historyRepository.getHistoryCount()
+                .onSuccess { count ->
+                    _uiState.value = _uiState.value.copy(totalAnalysis = count)
+                }
+        }
+    }
+}
+
+/**
+ * UI State untuk History Screen
+ */
+data class HistoryUiState(
+    val historyItems: List<HistoryItem> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val totalAnalysis: Int = 0
+) {
+    val isEmpty: Boolean = historyItems.isEmpty() && !isLoading
+    val hasError: Boolean = error != null
 }
