@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    // kapt
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
@@ -93,6 +94,17 @@ dependencies {
 
     // Camera
     implementation(libs.bundles.camerax)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.material3)
+    implementation(libs.androidx.camera.core)
+    implementation(libs.camerax.camera2)
+    implementation(libs.camerax.lifecycle)
+    implementation(libs.camerax.view)
+    // Coil
+    implementation(libs.coil.compose)
+    // Ucrop
+    implementation(libs.ucrop)
+
 
     // Local Storage
     implementation(libs.androidx.datastore)

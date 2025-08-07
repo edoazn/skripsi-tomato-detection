@@ -1,9 +1,8 @@
 package com.example.docmat.presentation.navigation
 
+import android.net.Uri
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -12,21 +11,22 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.docmat.R
-import com.example.docmat.R.drawable.ic_news
 import com.example.docmat.presentation.ui.screens.auth.login.LoginScreen
 import com.example.docmat.presentation.ui.screens.auth.register.RegisterScreen
 import com.example.docmat.presentation.ui.screens.auth.register.RegisterViewModel
@@ -35,6 +35,7 @@ import com.example.docmat.presentation.ui.screens.history.HistoryScreen
 import com.example.docmat.presentation.ui.screens.history.HistoryViewModel
 import com.example.docmat.presentation.ui.screens.homescreen.HomeScreen
 import com.example.docmat.presentation.ui.screens.homescreen.HomeViewModel
+import com.example.docmat.presentation.ui.screens.preview.PreviewScreen
 import com.example.docmat.presentation.ui.screens.settings.SettingsScreen
 import com.google.firebase.auth.FirebaseAuth
 
@@ -47,52 +48,46 @@ fun DocmatNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    // Hide bottom navigation for specific routes
+    val shouldShowBottomBar = when {
+        currentRoute == DocmatScreens.Login.route -> false
+        currentRoute == DocmatScreens.Register.route -> false
+        currentRoute == DocmatScreens.Camera.route -> false
+        currentRoute?.startsWith("preview/") == true -> false
+        else -> true
+    }
+
     Scaffold(
         bottomBar = {
-            if (currentRoute != DocmatScreens.Login.route && currentRoute != DocmatScreens.Register.route) {
-                NavigationBar {
-                    val items = listOf(
-                        DocmatScreens.Home,
-                        DocmatScreens.History,
-                        DocmatScreens.News,
-                        DocmatScreens.Settings
-                    )
-
-                    items.forEach { item ->
+            if (shouldShowBottomBar) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    bottomNavItems.forEach { item ->
                         NavigationBarItem(
                             icon = {
-                                if (item.icon != null) {
-                                    Icon(
-                                        painter = painterResource(id = item.icon),
-                                        contentDescription = item.title,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Home,
-                                        contentDescription = item.title,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
+                                Icon(
+                                    painter = painterResource(id = item.icon),
+                                    contentDescription = item.title,
+                                    modifier = Modifier.size(24.dp)
+                                )
                             },
                             label = { Text(item.title) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                indicatorColor = Color.Transparent
-                            ),
                             selected = currentRoute == item.route,
                             onClick = {
                                 navController.navigate(item.route) {
-                                    popUpTo(navController.graph.startDestinationRoute!!) {
-                                        saveState = true
-                                    }
+                                    popUpTo(navController.graph.startDestinationId)
                                     launchSingleTop = true
-                                    restoreState = true
                                 }
-                            }
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = Color.Gray,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedTextColor = Color.Gray,
+                                indicatorColor = Color.Transparent
+                            )
                         )
                     }
                 }
@@ -100,97 +95,129 @@ fun DocmatNavigation(
         }
     ) { paddingValues ->
 
+        // Start destination
         val startDest =
             if (FirebaseAuth.getInstance().currentUser != null)
                 DocmatScreens.Home.route
             else
                 DocmatScreens.Login.route
 
-
         NavHost(
             navController = navController,
             startDestination = startDest,
-            modifier = Modifier.padding(paddingValues)
+            modifier = if (shouldShowBottomBar) {
+                Modifier.padding(paddingValues)
+            } else {
+                Modifier
+            }
         ) {
-            // Login Route
             composable(DocmatScreens.Login.route) {
                 LoginScreen(
-                    onLoginSuccess = {
-                        navController.navigate(DocmatScreens.Home.route) {
-                            popUpTo(DocmatScreens.Login.route) {
-                                inclusive = true
-                            }
-                            launchSingleTop = true
-                        }
-                    },
                     onNavigateToRegister = {
                         navController.navigate(DocmatScreens.Register.route)
+                    },
+                    onLoginSuccess = {
+                        navController.navigate(DocmatScreens.Home.route) {
+                            popUpTo(DocmatScreens.Login.route) { inclusive = true }
+                        }
                     }
                 )
             }
 
-            // Register Route
             composable(DocmatScreens.Register.route) {
-                val vm: RegisterViewModel = hiltViewModel()
+                val registerViewModel: RegisterViewModel = hiltViewModel()
                 RegisterScreen(
-                    viewModel = vm,
-                    onEvent = vm::onEvent,
-                    onRegisterSuccess = { navController.popBackStack() },
+                    viewModel = registerViewModel,
                     onNavigateToLogin = {
-                        navController.navigate(DocmatScreens.Login.route)
+                        navController.popBackStack()
+                    },
+                    onRegisterSuccess = {
+                        navController.navigate(DocmatScreens.Home.route) {
+                            popUpTo(DocmatScreens.Register.route) { inclusive = true }
+                        }
+                    },
+                    onEvent = { event ->
+                        // Handle register events through viewModel
+                        registerViewModel.onEvent(event)
                     }
                 )
             }
 
-            // Home Screen
             composable(DocmatScreens.Home.route) {
                 HomeScreen(
                     viewModel = homeViewModel,
                     onNavigateToCamera = {
                         navController.navigate(DocmatScreens.Camera.route)
                     },
-                    onNavigateToHistory = {
-                        navController.navigate(DocmatScreens.History.route)
-                    },
-                    onNavigateToSettings = {
-                        navController.navigate(DocmatScreens.Settings.route)
+                    onNavigateToGallery = {
+                        val encodedUri = Uri.encode(it.toString())
+                        navController.navigate(DocmatScreens.Preview.createRoute(encodedUri))
                     }
                 )
             }
 
-            // Camera
-            composable(DocmatScreens.Camera.route) {
-                CameraScreen(
-                    onNavigateBack = {
-                        navController.popBackStack()
-                    }
-                )
+            composable(DocmatScreens.News.route) {
+                // TODO: Implement news screen
+                Text(text = "News", textAlign = TextAlign.Center)
             }
 
-            // History Route
             composable(DocmatScreens.History.route) {
                 HistoryScreen(
                     viewModel = historyViewModel,
-                    onNavigateToDetail = { historyId ->
-                        // Handle navigation to history detail screen if needed (not implemented here)
-                        // Example: navController.navigate("history_detail/$historyId")
-                        navController.navigate(DocmatScreens.History.route)
-                    },
+                    onNavigateToDetail = { historyItem ->
+                        // TODO: Navigate to detail screen
+                    }
                 )
             }
 
-            // News Route
-            composable(DocmatScreens.News.route) {
-                // Placeholder for News Screen
-                // You can implement the NewsScreen composable similarly to others
-                Text("News Screen", modifier = Modifier.padding(16.dp))
-            }
-
-            // Settings Route
             composable(DocmatScreens.Settings.route) {
                 SettingsScreen(
                     onNavigateBack = {
                         navController.popBackStack()
+                    },
+                    onLogoutClick = {
+                        FirebaseAuth.getInstance().signOut()
+                        navController.navigate(DocmatScreens.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
+
+            composable(DocmatScreens.Camera.route) {
+                CameraScreen(
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onImageCaptured = { uri ->
+                        val encodedUri = Uri.encode(uri.toString())
+                        navController.navigate(DocmatScreens.Preview.createRoute(encodedUri))
+                    }
+                )
+            }
+
+            composable(
+                route = DocmatScreens.Preview.route,
+                arguments = listOf(
+                    navArgument("imageUri") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val encodedUri = backStackEntry.arguments?.getString("imageUri")
+                val imageUri = Uri.parse(Uri.decode(encodedUri))
+
+                PreviewScreen(
+                    imageUri = imageUri,
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onRetakePhoto = {
+                        navController.popBackStack(DocmatScreens.Camera.route, inclusive = false)
+                    },
+                    onAnalyzePhoto = { uri ->
+                        // TODO: Navigate to analysis result screen
+                        navController.navigate(DocmatScreens.Home.route) {
+                            popUpTo(DocmatScreens.Home.route) { inclusive = true }
+                        }
                     }
                 )
             }
@@ -198,38 +225,45 @@ fun DocmatNavigation(
     }
 }
 
-sealed class DocmatScreens(
-    val route: String,
-    val title: String = "",
-    val icon: Int? = null
-) {
-    data object Auth : DocmatScreens("auth")
+// Bottom navigation items
+private val bottomNavItems = listOf(
+    BottomNavItem(
+        title = "Home",
+        icon = R.drawable.ic_home,
+        route = DocmatScreens.Home.route
+    ),
+    BottomNavItem(
+        title = "History",
+        icon = R.drawable.ic_history,
+        route = DocmatScreens.History.route
+    ),
+    BottomNavItem(
+        title = "News",
+        icon = R.drawable.ic_news,
+        route = DocmatScreens.News.route
+    ),
+    BottomNavItem(
+        title = "Settings",
+        icon = R.drawable.ic_settings,
+        route = DocmatScreens.Settings.route
+    )
+)
 
+data class BottomNavItem(
+    val title: String,
+    val icon: Int,
+    val route: String
+)
+
+sealed class DocmatScreens(val route: String) {
     data object Login : DocmatScreens("login")
     data object Register : DocmatScreens("register")
-    data object ForgotPassword : DocmatScreens("forgot_password")
-    data object Home : DocmatScreens(
-        route = "home",
-        title = "Home",
-        icon = R.drawable.ic_home
-    )
-
+    data object Home : DocmatScreens("home")
+    data object History : DocmatScreens("history")
+    data object News : DocmatScreens("news")
+    data object Settings : DocmatScreens("settings")
     data object Camera : DocmatScreens("camera")
-    data object History : DocmatScreens(
-        route = "history",
-        title = "History",
-        icon = R.drawable.ic_history
-    )
-
-    data object News : DocmatScreens(
-        route = "news",
-        title = "News",
-        icon = ic_news
-    )
-
-    data object Settings : DocmatScreens(
-        route = "settings",
-        title = "Settings",
-        icon = R.drawable.ic_settings
-    )
+    data object Preview : DocmatScreens("preview/{imageUri}") {
+        fun createRoute(imageUri: String) = "preview/$imageUri"
+    }
 }
