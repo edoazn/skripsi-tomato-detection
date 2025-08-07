@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 import io
 import os
+import json
 import numpy as np
 import tensorflow as tf
 from PIL import Image
@@ -127,7 +128,8 @@ NAMA_KELAS = list(INFORMASI_PENYAKIT.keys())
 UKURAN_INPUT_MODEL = (224, 224)
 
 # Inisialisasi Firebase Admin dengan file service account
-cred = credentials.Certificate("docmat-app-firebase-adminsdk-key.json")
+firebase_json = os.getenv("FIREBASE_CREDENTIALS")
+cred = credentials.Certificate(json.loads(firebase_json))
 firebase_admin.initialize_app(cred)
 
 
