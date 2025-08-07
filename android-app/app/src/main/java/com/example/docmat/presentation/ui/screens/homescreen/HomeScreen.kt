@@ -49,6 +49,7 @@ fun HomeScreen(
         when (result.resultCode) {
             Activity.RESULT_OK -> {
                 UCropHelper.handleCropResult(result.data)?.let { croppedUri ->
+                    Log.d("UCrop", "Crop successful: $croppedUri")
                     onNavigateToGallery(croppedUri)
                 }
             }
@@ -56,8 +57,13 @@ fun HomeScreen(
             UCrop.RESULT_ERROR -> {
                 UCropHelper.handleCropError(result.data)?.let { error ->
                     Log.e("UCrop", "Crop error: ${error.message}")
-                    // Show error message to user
+                    // TODO: Show snackbar atau toast untuk crop error
                 }
+            }
+            
+            Activity.RESULT_CANCELED -> {
+                Log.d("UCrop", "Crop cancelled by user")
+                // User cancelled cropping, do nothing
             }
         }
     }

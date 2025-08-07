@@ -17,9 +17,9 @@ object UCropHelper {
         context: Context,
         sourceUri: Uri,
         launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-        aspectRatioX: Float = 1f,
-        aspectRatioY: Float = 1f,
-        maxResultSize: Int = 1024
+        aspectRatioX: Float = 4f,
+        aspectRatioY: Float = 3f,
+        maxResultSize: Int = 1536
     ) {
         val destinationUri = createDestinationUri(context)
 
@@ -40,25 +40,33 @@ object UCropHelper {
     // Create crop options
     private fun createCropOptions(context: Context): UCrop.Options {
         return UCrop.Options().apply {
-            // Compression
-            setCompressionQuality(90)
+            // Compression - Higher quality untuk better analysis
+            setCompressionQuality(95)
             setCompressionFormat(Bitmap.CompressFormat.JPEG)
 
             // UI Customization
-            setToolbarTitle("Crop Tomato Image")
+            setToolbarTitle("Potong Gambar Tomat")
             setStatusBarColor(ContextCompat.getColor(context, android.R.color.black))
             setToolbarColor(ContextCompat.getColor(context, android.R.color.black))
             setToolbarWidgetColor(ContextCompat.getColor(context, android.R.color.white))
             setActiveControlsWidgetColor(ContextCompat.getColor(context, R.color.teal_200))
 
-            // Crop Features
-            setFreeStyleCropEnabled(true)
+            // Crop Features - Optimized for tomato images
+            setFreeStyleCropEnabled(false) // Force aspect ratio untuk consistency
             setHideBottomControls(false)
             setShowCropFrame(true)
             setShowCropGrid(true)
-
-            // Circle crop for better tomato detection (optional)
+            
+            // Size constraints untuk prevent extreme zoom
+            setMaxScaleMultiplier(3.0f) // Limit zoom to 3x
+            setImageToCropBoundsAnimDuration(300)
+            
+            // Better dimmed layer
+            setDimmedLayerColor(ContextCompat.getColor(context, android.R.color.black))
             setCircleDimmedLayer(false)
+            
+            // Root view background
+            setRootViewBackgroundColor(ContextCompat.getColor(context, android.R.color.black))
         }
     }
 

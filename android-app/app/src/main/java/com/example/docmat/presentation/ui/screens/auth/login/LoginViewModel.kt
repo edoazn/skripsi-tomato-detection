@@ -74,6 +74,11 @@ class LoginViewModel : ViewModel() {
             try {
                 auth.signInWithEmailAndPassword(s.email, s.password).await()
                 _state.update { it.copy(isLoading = false, isSuccess = true) }
+
+                // print tokenId
+                val user = auth.currentUser
+                val tokenId = user?.getIdToken(true)?.await()?.token
+                println("Token ID: $tokenId")
             } catch (e: Exception) {
                 _state.update { it.copy(isLoading = false, errorMessage = getErrorMessage(e)) }
             }

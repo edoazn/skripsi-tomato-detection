@@ -1,7 +1,6 @@
 package com.example.docmat.di
 
-
-//import com.example.docmat.data.remote.AzureMLApiService
+import com.example.docmat.data.remote.api.TomatoApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,15 +35,15 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://your-azure-ml-endpoint.com/") // TODO: Replace with actual Azure ML endpoint
+            .baseUrl("https://api-tomato-egguhyh6bbcgh2aq.indonesiacentral-01.azurewebsites.net/")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
-//    @Provides
-//    @Singleton
-//    fun provideAzureMLApiService(retrofit: Retrofit): AzureMLApiService {
-//        return retrofit.create(AzureMLApiService::class.java)
-//    }
+    @Provides
+    @Singleton
+    fun provideTomatoApiService(retrofit: Retrofit): TomatoApiService {
+        return retrofit.create(TomatoApiService::class.java)
+    }
 }

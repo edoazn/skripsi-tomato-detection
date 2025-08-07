@@ -27,6 +27,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.docmat.R
+import android.util.Base64
 import com.example.docmat.presentation.ui.screens.auth.login.LoginScreen
 import com.example.docmat.presentation.ui.screens.auth.register.RegisterScreen
 import com.example.docmat.presentation.ui.screens.auth.register.RegisterViewModel
@@ -36,6 +37,7 @@ import com.example.docmat.presentation.ui.screens.history.HistoryViewModel
 import com.example.docmat.presentation.ui.screens.homescreen.HomeScreen
 import com.example.docmat.presentation.ui.screens.homescreen.HomeViewModel
 import com.example.docmat.presentation.ui.screens.preview.PreviewScreen
+import com.example.docmat.presentation.ui.screens.detail.DetailResultScreen
 import com.example.docmat.presentation.ui.screens.settings.SettingsScreen
 import com.google.firebase.auth.FirebaseAuth
 
@@ -54,6 +56,7 @@ fun DocmatNavigation(
         currentRoute == DocmatScreens.Register.route -> false
         currentRoute == DocmatScreens.Camera.route -> false
         currentRoute?.startsWith("preview/") == true -> false
+        currentRoute?.startsWith("detail_result/") == true -> false
         else -> true
     }
 
@@ -213,11 +216,67 @@ fun DocmatNavigation(
                     onRetakePhoto = {
                         navController.popBackStack(DocmatScreens.Camera.route, inclusive = false)
                     },
-                    onAnalyzePhoto = { uri ->
-                        // TODO: Navigate to analysis result screen
-                        navController.navigate(DocmatScreens.Home.route) {
-                            popUpTo(DocmatScreens.Home.route) { inclusive = true }
+                    onAnalyzePhoto = { predictionResult, originalImageUri ->
+                        try {
+                            val encodedImageUri = Uri.encode(originalImageUri.toString())
+                            
+                            // Use Base64 encoding untuk avoid JSON escaping issues
+                            val jsonString = com.google.gson.Gson().toJson(predictionResult)
+                            val base64Json = Base64.encodeToString(
+                                jsonString.toByteArray(Charsets.UTF_8), 
+                                Base64.URL_SAFE or Base64.NO_WRAP
+                            )
+                            
+                            navController.navigate(
+                                DocmatScreens.DetailResult.createRoute(base64Json, encodedImageUri)
+                            )
+                        } catch (e: Exception) {
+                            android.util.Log.e("Navigation", "Failed to serialize result: ${e.message}")
+                            // Fallback: just go back
+                            navController.popBackStack()
                         }
+                    }
+                )
+            }
+
+            composable(
+                route = DocmatScreens.DetailResult.route,
+                arguments = listOf(
+                    navArgument("resultJson") { type = NavType.StringType },
+                    navArgument("imageUri") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val base64ResultJson = backStackEntry.arguments?.getString("resultJson")
+                val encodedImageUri = backStackEntry.arguments?.getString("imageUri")
+                val imageUri = Uri.decode(encodedImageUri)
+                
+                val predictionResult = try {
+                    // Decode Base64 back to JSON string
+                    val jsonBytes = Base64.decode(base64ResultJson, Base64.URL_SAFE or Base64.NO_WRAP)
+                    val jsonString = String(jsonBytes, Charsets.UTF_8)
+                    
+                    com.google.gson.Gson().fromJson(
+                        jsonString,
+                        com.example.docmat.domain.model.PredictionResult::class.java
+                    )
+                } catch (e: Exception) {
+                    android.util.Log.e("Navigation", "Failed to deserialize result: ${e.message}")
+                    // Return to previous screen if deserialization fails
+                    navController.popBackStack()
+                    return@composable
+                }
+
+                DetailResultScreen(
+                    predictionResult = predictionResult,
+                    imageUri = imageUri,
+                    onBackClick = {
+                        navController.popBackStack()
+                    },
+                    onAnalyzeAgain = {
+                        navController.popBackStack(DocmatScreens.Preview.route, inclusive = false)
+                    },
+                    onShare = {
+                        // TODO: Implement share functionality
                     }
                 )
             }
@@ -265,5 +324,8 @@ sealed class DocmatScreens(val route: String) {
     data object Camera : DocmatScreens("camera")
     data object Preview : DocmatScreens("preview/{imageUri}") {
         fun createRoute(imageUri: String) = "preview/$imageUri"
+    }
+    data object DetailResult : DocmatScreens("detail_result/{resultJson}/{imageUri}") {
+        fun createRoute(resultJson: String, imageUri: String) = "detail_result/$resultJson/$imageUri"
     }
 }

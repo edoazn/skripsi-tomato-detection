@@ -84,6 +84,9 @@ dependencies {
 
     // Networking
     implementation(libs.bundles.networking)
+    
+    // JSON Parsing
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // Firebase
     implementation(platform(libs.firebase.bom))
