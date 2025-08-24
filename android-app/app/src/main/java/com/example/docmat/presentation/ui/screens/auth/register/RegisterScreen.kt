@@ -53,8 +53,8 @@ fun RegisterScreen(
     // Handle register success
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {
-            snackbarHostState.showSnackbar("Register berhasil")
-            kotlinx.coroutines.delay(1000)
+            snackbarHostState.showSnackbar("Akun berhasil dibuat! Silakan login untuk melanjutkan")
+            kotlinx.coroutines.delay(2000)
             onRegisterSuccess()
         }
     }

@@ -138,7 +138,7 @@ fun DocmatNavigation(
                         navController.popBackStack()
                     },
                     onRegisterSuccess = {
-                        navController.navigate(DocmatScreens.Home.route) {
+                        navController.navigate(DocmatScreens.Login.route) {
                             popUpTo(DocmatScreens.Register.route) { inclusive = true }
                         }
                     },
