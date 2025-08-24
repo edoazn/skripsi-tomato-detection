@@ -53,22 +53,16 @@ fun HistoryItemCard(
     // Handle different image sources for cross-device compatibility
     val imageData: Any? = when {
         historyItem.imageBase64.isNotBlank() -> {
-            android.util.Log.d("HistoryCard", "Loading Base64 image for ${historyItem.id}: ${historyItem.imageBase64.length} chars")
             // Convert Base64 to Bitmap for Coil
             com.example.docmat.utils.ImageCompressor.base64ToBitmap(historyItem.imageBase64)
         }
         historyItem.imageUrl.isNotBlank() -> {
-            android.util.Log.d("HistoryCard", "Loading Firebase Storage image for ${historyItem.id}: ${historyItem.imageUrl}")
             historyItem.imageUrl
         }
         historyItem.localImageUri.isNotBlank() -> {
-            android.util.Log.d("HistoryCard", "Loading local image for ${historyItem.id}: ${historyItem.localImageUri}")
             historyItem.localImageUri
         }
-        else -> {
-            android.util.Log.d("HistoryCard", "No image available for ${historyItem.id}")
-            null
-        }
+        else -> null
     }
 
     val request = remember(imageData, historyItem.id) {
@@ -78,17 +72,6 @@ fun HistoryItemCard(
             .allowHardware(false) // Better compatibility
             .diskCacheKey("history-${historyItem.id}")
             .memoryCacheKey("history-${historyItem.id}")
-            .listener(
-                onStart = {
-                    android.util.Log.d("Coil-HistoryCard", "Started loading image for ${historyItem.id}: $imageData")
-                },
-                onSuccess = { _, _ ->
-                    android.util.Log.d("Coil-HistoryCard", "Successfully loaded image for ${historyItem.id}")
-                },
-                onError = { _, error ->
-                    android.util.Log.e("Coil-HistoryCard", "Failed to load image for ${historyItem.id}: ${error.throwable.message}", error.throwable)
-                }
-            )
             .build()
     }
 
@@ -116,10 +99,6 @@ fun HistoryItemCard(
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop,
                 placeholder = painterResource(id = R.drawable.tomato),
-            )
-            android.util.Log.d(
-                "HistoryCard",
-                "id=${historyItem.id} imageUrl=${historyItem.imageUrl} local=${historyItem.localImageUri}"
             )
 
             // Content

@@ -30,12 +30,6 @@ fun HistoryScreen(
                         text = "Riwayat",
                         fontWeight = FontWeight.Bold
                     )
-                },
-                actions = {
-                    // Debug button for testing Firebase Storage URL accessibility
-                    TextButton(onClick = { viewModel.debugStorageAccess() }) {
-                        Text("Debug", style = MaterialTheme.typography.bodySmall)
-                    }
                 }
             )
         }
