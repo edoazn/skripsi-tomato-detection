@@ -89,14 +89,37 @@ fun DetailResultScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
+                val context = LocalContext.current
+                
+                // Handle different image sources for cross-device compatibility
+                val imageData: Any? = when {
+                    imageUri.startsWith("base64:") -> {
+                        // Extract base64 data and convert to bitmap
+                        val base64Data = imageUri.removePrefix("base64:")
+                        com.example.docmat.utils.ImageCompressor.base64ToBitmap(base64Data)
+                    }
+                    imageUri.startsWith("http") -> {
+                        // Firebase Storage URL or other web URL
+                        imageUri
+                    }
+                    imageUri.isNotBlank() -> {
+                        // Local URI or other formats
+                        imageUri
+                    }
+                    else -> null
+                }
+
                 AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(imageUri)
+                    model = ImageRequest.Builder(context)
+                        .data(imageData)
                         .crossfade(true)
+                        .allowHardware(false)
+                        .diskCacheKey("detail-${imageUri.hashCode()}")
+                        .memoryCacheKey("detail-${imageUri.hashCode()}")
                         .build(),
                     contentDescription = "Gambar yang dianalisis",
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Fit // Changed to Fit untuk show full cropped image
+                    contentScale = ContentScale.Fit
                 )
             }
 
