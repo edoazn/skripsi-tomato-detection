@@ -2,4 +2,15 @@
 <resources>
 
     <style name="Theme.Docmat" parent="android:Theme.Material.Light.NoActionBar" />
+    
+    <!-- Splash Screen Theme -->
+    <style name="Theme.Docmat.SplashScreen" parent="Theme.SplashScreen">
+        <!-- Set the splash screen background, animated icon, and animation duration -->
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/docmat_splash</item>
+        <item name="windowSplashScreenAnimationDuration">2000</item>
+        <!-- Set the theme of the Activity that directly follows your splash screen -->
+        <item name="postSplashScreenTheme">@style/Theme.Docmat</item>
+    </style>
+    
 </resources>

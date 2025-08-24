@@ -6,7 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
@@ -23,15 +23,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.docmat.domain.model.PredictionResult
-import com.example.docmat.presentation.theme.DocmatTheme
-import java.text.SimpleDateFormat
-import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +39,7 @@ fun DetailResultScreen(
     onShare: () -> Unit
 ) {
     val scrollState = rememberScrollState()
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -51,16 +47,16 @@ fun DetailResultScreen(
     ) {
         // Top Bar
         TopAppBar(
-            title = { 
+            title = {
                 Text(
                     text = "Detail Hasil Analisis",
                     fontWeight = FontWeight.SemiBold
-                ) 
+                )
             },
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Kembali"
                     )
                 }
@@ -116,38 +112,38 @@ fun DetailResultScreen(
                     modifier = Modifier.padding(24.dp)
                 ) {
                     Text(
-                        text = "🔬 Hasil Diagnosa",
+                        text = "Hasil Diagnosa",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     Text(
                         text = predictionResult.diseaseName,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    
+
                     // Confidence Score with Progress
                     Text(
-                        text = "📊 Tingkat Kepercayaan",
+                        text = "Tingkat Kepercayaan",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    
+
                     Spacer(modifier = Modifier.height(4.dp))
-                    
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         LinearProgressIndicator(
-                            progress = predictionResult.confidence.toFloat() / 100f,
+                            progress = { predictionResult.confidence.toFloat() / 100f },
                             modifier = Modifier
                                 .weight(1f)
                                 .height(8.dp)
@@ -156,11 +152,11 @@ fun DetailResultScreen(
                                 predictionResult.confidence >= 80 -> Color(0xFF4CAF50)
                                 predictionResult.confidence >= 60 -> Color(0xFFFF9800)
                                 else -> Color(0xFFF44336)
-                            }
+                            },
                         )
-                        
+
                         Spacer(modifier = Modifier.width(12.dp))
-                        
+
                         Text(
                             text = predictionResult.confidenceStr,
                             style = MaterialTheme.typography.titleMedium,
@@ -204,80 +200,6 @@ fun DetailResultScreen(
                 icon = Icons.Default.LocalHospital,
                 iconColor = Color(0xFF4CAF50)
             )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Analysis Info
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                )
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Informasi Analisis",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "ID Prediksi:",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = predictionResult.predictId,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Waktu Analisis:",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID"))
-                                .format(predictionResult.timestamp),
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Model Version:",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = predictionResult.modelVersion,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -372,9 +294,9 @@ private fun DetailInfoCard(
                         modifier = Modifier.size(20.dp)
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.width(16.dp))
-                
+
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleLarge,
@@ -382,9 +304,9 @@ private fun DetailInfoCard(
                     color = iconColor
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(18.dp))
-            
+
             Text(
                 text = content,
                 style = MaterialTheme.typography.bodyLarge,

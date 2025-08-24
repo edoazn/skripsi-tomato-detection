@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.material.icons.extended.android)
+    implementation(libs.androidx.core.splashscreen)
 
     // Compose BOM & UI
     implementation(platform(libs.androidx.compose.bom))
@@ -86,7 +87,7 @@ dependencies {
     implementation(libs.bundles.networking)
     
     // JSON Parsing
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.gson)
 
     // Firebase
     implementation(platform(libs.firebase.bom))

@@ -19,24 +19,25 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 import javax.inject.Inject
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import android.media.ExifInterface
-import android.provider.MediaStore
-import java.io.ByteArrayOutputStream
+import com.example.docmat.utils.ImageCompressor
+import com.example.docmat.utils.FirebaseStorageTest
+import com.example.docmat.utils.DebugHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class PreviewViewModel @Inject constructor(
     private val apiService: TomatoApiService,
-    private val historyRepository: HistoryRepository
-) : ViewModel() {
+    private val historyRepository: HistoryRepository,
+
+    ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PreviewUiState())
     val uiState: StateFlow<PreviewUiState> = _uiState.asStateFlow()
+    private val PREDICT_PART_NAME = "file"
+
 
     /**
      * Analyze image using ML API
@@ -50,46 +51,93 @@ class PreviewViewModel @Inject constructor(
                     loadingMessage = "Memproses gambar..."
                 )
 
-                // Convert Uri to File for upload
-                val imageFile = uriToFile(imageUri, context)
-                
-                _uiState.value = _uiState.value.copy(
-                    loadingMessage = "Mengunggah ke server..."
-                )
+                val imageFile = withContext(Dispatchers.IO) {
+                    ImageCompressor.prepareImage(context, imageUri)
+                }
 
-                // Create multipart body with proper MIME type
-                val mimeType = getMimeType(imageFile) ?: "image/jpeg"
+                val mimeType = resolveMime(context, imageUri, imageFile)
                 val requestFile = imageFile.asRequestBody(mimeType.toMediaTypeOrNull())
-                val body = MultipartBody.Part.createFormData("file", imageFile.name, requestFile)
-
-                _uiState.value = _uiState.value.copy(
-                    loadingMessage = "Menganalisis dengan AI..."
+                val body = MultipartBody.Part.createFormData(
+                    PREDICT_PART_NAME,
+                    imageFile.name,
+                    requestFile
                 )
 
-                // Get Firebase ID token for authentication
-                val user = FirebaseAuth.getInstance().currentUser
-                val idToken = user?.getIdToken(false)?.result?.token
-                
-                if (idToken == null) {
+                _uiState.value = _uiState.value.copy(loadingMessage = "Menganalisis dengan AI...")
+
+                // ambil token dengan await
+                val idToken =
+                    FirebaseAuth.getInstance().currentUser?.getIdToken(false)?.await()?.token
+                if (idToken.isNullOrEmpty()) {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         error = "Authentication failed. Please login again."
                     )
-                    return@launch
+                    imageFile.delete(); return@launch
                 }
 
-                // Make API call with Bearer token
-                val bearerToken = "Bearer $idToken"
-                val response = apiService.predictDisease(body, bearerToken)
+                val response = withContext(Dispatchers.IO) {
+                    apiService.predictDisease(
+                        body,
+                        "Bearer $idToken"
+                    )
+                }
 
                 if (response.isSuccessful) {
                     val predictionResponse = response.body()
                     if (predictionResponse != null) {
                         val predictionResult = predictionResponse.toDomain()
+
+                        // SIMPAN RIWAYAT dengan improved error handling
+                        _uiState.value = _uiState.value.copy(loadingMessage = "Menyimpan hasil analisis...")
                         
-                        // Save to history
-                        saveToHistory(predictionResult, imageUri.toString())
+                        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                        android.util.Log.d("PreviewVM", "Preparing to save history for user: $uid")
+                        android.util.Log.d("PreviewVM", "Image file details: path=${imageFile.absolutePath}, size=${imageFile.length()}, exists=${imageFile.exists()}")
                         
+                        val historyItem = HistoryItem.fromPredictionResult(
+                            predictionResult = predictionResult,
+                            userId = uid,
+                            localImageUri = imageUri.toString()
+                        )
+                        
+                        android.util.Log.d("PreviewVM", "Created history item: disease=${historyItem.diseaseName}, confidence=${historyItem.confidence}, localUri=${historyItem.localImageUri}")
+                        
+                        // Try Base64 first (reliable cross-device solution)
+                        android.util.Log.d("PreviewVM", "Starting saveToHistoryWithBase64Image...")
+                        historyRepository.saveToHistoryWithBase64Image(
+                            historyItem = historyItem,
+                            localImageFile = imageFile
+                        ).onSuccess { docId ->
+                            android.util.Log.d("PreviewVM", "✅ History saved with Base64 image, ID: $docId")
+                            imageFile.delete() // Delete file only if save successful
+                        }.onFailure { e ->
+                            android.util.Log.w("PreviewVM", "❌ Base64 save failed, trying Firebase Storage fallback: ${e.message}", e)
+                            
+                            // Fallback 1: Try Firebase Storage
+                            android.util.Log.d("PreviewVM", "Attempting Firebase Storage fallback...")
+                            historyRepository.saveToHistoryWithImage(
+                                historyItem = historyItem,
+                                localImageFile = imageFile
+                            ).onSuccess { docId ->
+                                android.util.Log.d("PreviewVM", "✅ History saved with Firebase Storage, ID: $docId")
+                                imageFile.delete()
+                            }.onFailure { storageError ->
+                                android.util.Log.w("PreviewVM", "❌ Firebase Storage also failed, saving without image: ${storageError.message}")
+                                
+                                // Final Fallback: Save without image
+                                historyRepository.saveToHistoryWithoutImage(historyItem)
+                                    .onSuccess { docId ->
+                                        android.util.Log.d("PreviewVM", "✅ History saved without image, ID: $docId")
+                                    }
+                                    .onFailure { finalError ->
+                                        android.util.Log.e("PreviewVM", "❌ Complete save failure: ${finalError.message}", finalError)
+                                    }
+                                
+                                imageFile.delete() // Clean up file anyway
+                            }
+                        }
+
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
                             predictionResult = predictionResult,
@@ -101,38 +149,43 @@ class PreviewViewModel @Inject constructor(
                             isLoading = false,
                             error = "Response kosong dari server"
                         )
+                        imageFile.delete() // Hapus file jika response kosong
                     }
                 } else {
+                    val serverMsg = withContext(Dispatchers.IO) { response.errorBody()?.string() }
+                        ?: "Unknown error"
                     val errorMessage = when (response.code()) {
-                        400 -> "Format gambar tidak valid. Gunakan JPEG, PNG, atau JPG."
-                        413 -> "Ukuran gambar terlalu besar. Maksimal 5MB."
-                        422 -> "Gambar tidak dapat diproses. Pastikan gambar jelas."
-                        500 -> "Server sedang bermasalah. Coba lagi nanti."
-                        else -> "Error ${response.code()}: ${response.message()}"
+                        400 -> "Format gambar tidak valid. Gunakan JPEG, PNG, atau JPG. ($serverMsg)"
+                        413 -> "Ukuran gambar terlalu besar. Maksimal 2MB. ($serverMsg)"
+                        422 -> "Gambar tidak dapat diproses. Pastikan gambar jelas. ($serverMsg)"
+                        401, 403 -> "Token auth tidak valid/kadaluarsa. Silakan login ulang. ($serverMsg)"
+                        else -> "Error ${response.code()}: ${response.message()} ($serverMsg)"
                     }
-                    
-                    _uiState.value = _uiState.value.copy(
-                        isLoading = false,
-                        error = errorMessage
-                    )
+                    _uiState.value = _uiState.value.copy(isLoading = false, error = errorMessage)
+                    imageFile.delete() // Hapus file jika error
                 }
-
-                // Clean up temp file
-                imageFile.delete()
-
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     error = when {
-                        e.message?.contains("timeout") == true -> "Koneksi timeout. Periksa internet Anda."
-                        e.message?.contains("network") == true -> "Tidak ada koneksi internet."
-                        e.message?.contains("host") == true -> "Server tidak dapat dijangkau."
+                        e.message?.contains(
+                            "timeout",
+                            true
+                        ) == true -> "Koneksi timeout. Periksa internet Anda."
+
+                        e.message?.contains(
+                            "network",
+                            true
+                        ) == true -> "Tidak ada koneksi internet."
+
+                        e.message?.contains("host", true) == true -> "Server tidak dapat dijangkau."
                         else -> "Terjadi kesalahan: ${e.message}"
                     }
                 )
             }
         }
     }
+
 
     /**
      * Reset states untuk analisis baru
@@ -147,163 +200,15 @@ class PreviewViewModel @Inject constructor(
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
     }
-    
-    /**
-     * Save prediction result to history
-     */
-    private fun saveToHistory(predictionResult: PredictionResult, localImageUri: String) {
-        viewModelScope.launch {
-            try {
-                val user = FirebaseAuth.getInstance().currentUser
-                val userId = user?.uid ?: return@launch
-                
-                val historyItem = HistoryItem.fromPredictionResult(
-                    predictionResult = predictionResult,
-                    userId = userId,
-                    localImageUri = localImageUri
-                )
-                
-                historyRepository.saveToHistory(historyItem)
-                    .onFailure { error ->
-                        // Log error but don't show to user (non-critical)
-                        android.util.Log.e("PreviewViewModel", "Failed to save to history: ${error.message}")
-                    }
-            } catch (e: Exception) {
-                android.util.Log.e("PreviewViewModel", "Exception saving to history: ${e.message}")
-            }
-        }
-    }
 
-    /**
-     * Convert Uri to File untuk upload dengan proper image processing
-     */
-    private fun uriToFile(uri: Uri, context: Context): File {
-        val tempFile = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
-        
-        try {
-            // Load bitmap from Uri
-            val bitmap = when {
-                uri.scheme == "content" -> {
-                    // Handle content:// URIs (gallery and camera)
-                    loadBitmapFromContentUri(uri, context)
-                }
-                uri.scheme == "file" -> {
-                    // Handle file:// URIs
-                    BitmapFactory.decodeFile(uri.path)
-                }
-                else -> {
-                    // Fallback: try as input stream
-                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                        BitmapFactory.decodeStream(inputStream)
-                    }
-                }
+    private fun resolveMime(context: Context, uri: Uri, file: File): String {
+        return context.contentResolver.getType(uri)
+            ?: when (file.extension.lowercase()) {
+                "jpg", "jpeg" -> "image/jpeg"
+                "png" -> "image/png"
+                "webp" -> "image/webp"
+                else -> "image/jpeg"
             }
-            
-            if (bitmap != null) {
-                // Apply EXIF rotation if needed
-                val rotatedBitmap = rotateImageIfRequired(uri, bitmap, context)
-                
-                // Compress and save as JPEG with proper quality
-                FileOutputStream(tempFile).use { outputStream ->
-                    val quality = if (rotatedBitmap.byteCount > 1024 * 1024 * 2) 80 else 90 // 2MB threshold
-                    rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
-                }
-                
-                // Clean up bitmap
-                if (rotatedBitmap != bitmap) {
-                    rotatedBitmap.recycle()
-                }
-                bitmap.recycle()
-            } else {
-                // Fallback: direct copy if bitmap fails
-                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    FileOutputStream(tempFile).use { outputStream ->
-                        inputStream.copyTo(outputStream)
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            // Final fallback: direct stream copy
-            try {
-                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    FileOutputStream(tempFile).use { outputStream ->
-                        inputStream.copyTo(outputStream)
-                    }
-                }
-            } catch (fallbackException: Exception) {
-                throw IllegalStateException("Failed to process image: ${fallbackException.message}", fallbackException)
-            }
-        }
-        
-        return tempFile
-    }
-    
-    /**
-     * Load bitmap from content URI with proper handling
-     */
-    private fun loadBitmapFromContentUri(uri: Uri, context: Context): Bitmap? {
-        return try {
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                BitmapFactory.decodeStream(inputStream)
-            }
-        } catch (e: Exception) {
-            null
-        }
-    }
-    
-    /**
-     * Rotate image based on EXIF data
-     */
-    private fun rotateImageIfRequired(uri: Uri, bitmap: Bitmap, context: Context): Bitmap {
-        return try {
-            val exif = when {
-                uri.scheme == "content" -> {
-                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                        ExifInterface(inputStream)
-                    }
-                }
-                uri.scheme == "file" && uri.path != null -> {
-                    ExifInterface(uri.path!!)
-                }
-                else -> null
-            }
-            
-            val orientation = exif?.getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_NORMAL
-            ) ?: ExifInterface.ORIENTATION_NORMAL
-            
-            when (orientation) {
-                ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90f)
-                ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180f)
-                ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270f)
-                else -> bitmap
-            }
-        } catch (e: Exception) {
-            bitmap // Return original if rotation fails
-        }
-    }
-    
-    /**
-     * Rotate bitmap by degrees
-     */
-    private fun rotateImage(bitmap: Bitmap, degrees: Float): Bitmap {
-        val matrix = Matrix()
-        matrix.postRotate(degrees)
-        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
-    }
-    
-    /**
-     * Get proper MIME type for file
-     */
-    private fun getMimeType(file: File): String? {
-        val extension = file.extension.lowercase()
-        return when (extension) {
-            "jpg", "jpeg" -> "image/jpeg"
-            "png" -> "image/png"
-            "webp" -> "image/webp"
-            else -> "image/jpeg" // Default to JPEG
-        }
     }
 }
 

@@ -285,7 +285,7 @@ fun PreviewScreen(
             }
         }
 
-        // Success Result Overlay (temporary display)
+        // Success Result Overlay
         uiState.predictionResult?.let { result ->
             if (uiState.isSuccess) {
                 Card(

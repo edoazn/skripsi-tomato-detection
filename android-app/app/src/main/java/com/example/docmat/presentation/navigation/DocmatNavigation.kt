@@ -39,6 +39,8 @@ import com.example.docmat.presentation.ui.screens.homescreen.HomeViewModel
 import com.example.docmat.presentation.ui.screens.preview.PreviewScreen
 import com.example.docmat.presentation.ui.screens.detail.DetailResultScreen
 import com.example.docmat.presentation.ui.screens.settings.SettingsScreen
+import com.example.docmat.presentation.ui.screens.news.NewsScreen
+import com.example.docmat.presentation.ui.screens.news.NewsDetailScreen
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -57,6 +59,7 @@ fun DocmatNavigation(
         currentRoute == DocmatScreens.Camera.route -> false
         currentRoute?.startsWith("preview/") == true -> false
         currentRoute?.startsWith("detail_result/") == true -> false
+        currentRoute?.startsWith("news_detail/") == true -> false
         else -> true
     }
 
@@ -155,13 +158,20 @@ fun DocmatNavigation(
                     onNavigateToGallery = {
                         val encodedUri = Uri.encode(it.toString())
                         navController.navigate(DocmatScreens.Preview.createRoute(encodedUri))
+                    },
+                    onNewsClick = { newsId ->
+                        navController.navigate(DocmatScreens.NewsDetail.createRoute(newsId.toString()))
                     }
                 )
             }
 
             composable(DocmatScreens.News.route) {
-                // TODO: Implement news screen
-                Text(text = "News", textAlign = TextAlign.Center)
+                NewsScreen(
+                    onNavigateToDetail = { news ->
+                        // Navigate with news ID only
+                        navController.navigate(DocmatScreens.NewsDetail.createRoute(news.id.toString()))
+                    }
+                )
             }
 
             composable(DocmatScreens.History.route) {
@@ -170,36 +180,32 @@ fun DocmatNavigation(
                         try {
                             val predictionResult = historyItem.toPredictionResult()
                             val encodedImageUri = Uri.encode(imageUri)
-                            
+
                             // Use Base64 encoding untuk avoid JSON escaping issues
                             val jsonString = com.google.gson.Gson().toJson(predictionResult)
                             val base64Json = Base64.encodeToString(
-                                jsonString.toByteArray(Charsets.UTF_8), 
+                                jsonString.toByteArray(Charsets.UTF_8),
                                 Base64.URL_SAFE or Base64.NO_WRAP
                             )
-                            
+
                             navController.navigate(
                                 DocmatScreens.DetailResult.createRoute(base64Json, encodedImageUri)
                             )
                         } catch (e: Exception) {
-                            android.util.Log.e("Navigation", "Failed to serialize result: ${e.message}")
+                            android.util.Log.e(
+                                "Navigation",
+                                "Failed to serialize result: ${e.message}"
+                            )
                         }
-                    },
-                    onBackClick = {
-                        navController.popBackStack()
                     }
                 )
             }
 
             composable(DocmatScreens.Settings.route) {
                 SettingsScreen(
-                    onNavigateBack = {
-                        navController.popBackStack()
-                    },
-                    onLogoutClick = {
-                        FirebaseAuth.getInstance().signOut()
+                    onLogoutSuccess = {
                         navController.navigate(DocmatScreens.Login.route) {
-                            popUpTo(0) { inclusive = true }
+                            popUpTo(DocmatScreens.Settings.route) { inclusive = true }
                         }
                     }
                 )
@@ -237,19 +243,22 @@ fun DocmatNavigation(
                     onAnalyzePhoto = { predictionResult, originalImageUri ->
                         try {
                             val encodedImageUri = Uri.encode(originalImageUri.toString())
-                            
+
                             // Use Base64 encoding untuk avoid JSON escaping issues
                             val jsonString = com.google.gson.Gson().toJson(predictionResult)
                             val base64Json = Base64.encodeToString(
-                                jsonString.toByteArray(Charsets.UTF_8), 
+                                jsonString.toByteArray(Charsets.UTF_8),
                                 Base64.URL_SAFE or Base64.NO_WRAP
                             )
-                            
+
                             navController.navigate(
                                 DocmatScreens.DetailResult.createRoute(base64Json, encodedImageUri)
                             )
                         } catch (e: Exception) {
-                            android.util.Log.e("Navigation", "Failed to serialize result: ${e.message}")
+                            android.util.Log.e(
+                                "Navigation",
+                                "Failed to serialize result: ${e.message}"
+                            )
                             // Fallback: just go back
                             navController.popBackStack()
                         }
@@ -267,12 +276,13 @@ fun DocmatNavigation(
                 val base64ResultJson = backStackEntry.arguments?.getString("resultJson")
                 val encodedImageUri = backStackEntry.arguments?.getString("imageUri")
                 val imageUri = Uri.decode(encodedImageUri)
-                
+
                 val predictionResult = try {
                     // Decode Base64 back to JSON string
-                    val jsonBytes = Base64.decode(base64ResultJson, Base64.URL_SAFE or Base64.NO_WRAP)
+                    val jsonBytes =
+                        Base64.decode(base64ResultJson, Base64.URL_SAFE or Base64.NO_WRAP)
                     val jsonString = String(jsonBytes, Charsets.UTF_8)
-                    
+
                     com.google.gson.Gson().fromJson(
                         jsonString,
                         com.example.docmat.domain.model.PredictionResult::class.java
@@ -295,6 +305,29 @@ fun DocmatNavigation(
                     },
                     onShare = {
                         // TODO: Implement share functionality
+                    }
+                )
+            }
+
+            composable(
+                route = DocmatScreens.NewsDetail.route,
+                arguments = listOf(
+                    navArgument("newsId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val newsIdString = backStackEntry.arguments?.getString("newsId")
+                val newsId = newsIdString?.toIntOrNull()
+
+                if (newsId == null) {
+                    android.util.Log.e("Navigation", "Invalid news ID: $newsIdString")
+                    navController.popBackStack()
+                    return@composable
+                }
+
+                com.example.docmat.presentation.ui.screens.news.NewsDetailWithViewModelScreen(
+                    newsId = newsId,
+                    onBackClick = {
+                        navController.popBackStack()
                     }
                 )
             }
@@ -343,7 +376,13 @@ sealed class DocmatScreens(val route: String) {
     data object Preview : DocmatScreens("preview/{imageUri}") {
         fun createRoute(imageUri: String) = "preview/$imageUri"
     }
+
     data object DetailResult : DocmatScreens("detail_result/{resultJson}/{imageUri}") {
-        fun createRoute(resultJson: String, imageUri: String) = "detail_result/$resultJson/$imageUri"
+        fun createRoute(resultJson: String, imageUri: String) =
+            "detail_result/$resultJson/$imageUri"
+    }
+
+    data object NewsDetail : DocmatScreens("news_detail/{newsId}") {
+        fun createRoute(newsId: String) = "news_detail/$newsId"
     }
 }

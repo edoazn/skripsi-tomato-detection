@@ -100,7 +100,7 @@ fun RegisterScreen(
                 )
                 Spacer(Modifier.height(16.dp))
                 Image(
-                    painter = painterResource(id = R.drawable.dimasjid_layo),
+                    painter = painterResource(id = R.drawable.register),
                     contentDescription = "register image",
                     modifier = Modifier
                         .size(180.dp)

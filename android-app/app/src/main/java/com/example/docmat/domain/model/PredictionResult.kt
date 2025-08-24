@@ -1,8 +1,6 @@
 package com.example.docmat.domain.model
 
-/**
- * Domain model untuk hasil prediksi penyakit tomat
- */
+
 data class PredictionResult(
     val predictId: String,
     val diseaseId: String,

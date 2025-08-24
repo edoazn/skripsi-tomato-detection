@@ -13,44 +13,31 @@ class HomeViewModel : ViewModel() {
         // Temporary mock data
         _news.value = listOf(
             News(
-                id = "1",
+                id = 1,
                 title = "Tomato Disease Prevention Tips",
-                content = "Learn how to prevent common tomato diseases with these expert tips.",
+                description = "Learn how to prevent common tomato diseases with these expert tips.",
+                content = "Learn how to prevent common tomato diseases with these expert tips. Proper plant spacing, adequate watering, and regular monitoring are key factors.",
                 imageUrl = "https://example.com/tomato_disease.jpg",
-                date = "2023-10-01",
-                author = "John Doe"
+                publishedAt = "2023-10-01T00:00:00Z",
+                source = "Agriculture Expert"
             ),
             News(
-                id = "2",
+                id = 2,
                 title = "Best Practices for Tomato Cultivation",
-                content = "Discover the best practices for cultivating healthy tomato plants.",
+                description = "Discover the best practices for cultivating healthy tomato plants.",
+                content = "Discover the best practices for cultivating healthy tomato plants. Soil preparation, proper fertilization, and pest management are crucial.",
                 imageUrl = "https://example.com/tomato_cultivation.jpg",
-                date = "2023-10-02",
-                author = "Jane Smith"
+                publishedAt = "2023-10-02T00:00:00Z",
+                source = "Farm Daily"
             ),
             News(
-                id = "3",
+                id = 3,
                 title = "Tomato Harvesting Techniques",
-                content = "Master the techniques for harvesting tomatoes at the right time.",
+                description = "Master the techniques for harvesting tomatoes at the right time.",
+                content = "Master the techniques for harvesting tomatoes at the right time. Timing, proper handling, and storage methods are essential.",
                 imageUrl = "https://example.com/tomato_harvesting.jpg",
-                date = "2023-10-03",
-                author = "Emily Johnson"
-            ),
-            News(
-                id = "4",
-                title = "Tomato Varieties to Try This Season",
-                content = "Explore different tomato varieties that thrive in various climates.",
-                imageUrl = "https://example.com/tomato_varieties.jpg",
-                date = "2023-10-04",
-                author = "Michael Brown"
-            ),
-            News(
-                id = "5",
-                title = "Organic Tomato Farming Techniques",
-                content = "Learn about organic farming techniques for growing tomatoes sustainably.",
-                imageUrl = "https://example.com/organic_tomato_farming.jpg",
-                date = "2023-10-05",
-                author = "Sarah Wilson"
+                publishedAt = "2023-10-03T00:00:00Z",
+                source = "Harvest Magazine"
             )
         )
     }

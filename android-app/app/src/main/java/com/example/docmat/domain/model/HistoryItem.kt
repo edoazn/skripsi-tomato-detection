@@ -19,7 +19,8 @@ data class HistoryItem(
     val causes: String = "",
     val solutions: String = "",
     val imageUrl: String = "",
-    val localImageUri: String = "", // For offline display
+    val localImageUri: String = "",
+    val imageBase64: String = "", // Base64 encoded image for cross-device compatibility
     val timestamp: Timestamp = Timestamp.now(),
     val modelVersion: String = "",
     val createdAt: Timestamp = Timestamp.now()
@@ -43,7 +44,7 @@ data class HistoryItem(
             modelVersion = modelVersion
         )
     }
-    
+
     /**
      * Get formatted date for display
      */
@@ -68,6 +69,24 @@ data class HistoryItem(
     val isHealthy: Boolean
         get() = diseaseName.contains("healthy", ignoreCase = true)
     
+    /**
+     * Get the best available image URL for cross-device compatibility
+     * Priority: Base64 > Firebase Storage URL > Local URI > Empty
+     */
+    val bestImageUrl: String
+        get() = when {
+            imageBase64.isNotBlank() -> "base64:$imageBase64" // Base64 image (works across devices)
+            imageUrl.isNotBlank() -> imageUrl // Firebase Storage URL (works across devices)
+            localImageUri.isNotBlank() -> localImageUri // Local URI (current device only)
+            else -> "" // No image available
+        }
+    
+    /**
+     * Check if this history item has a cross-device compatible image
+     */
+    val hasCrossDeviceImage: Boolean
+        get() = imageBase64.isNotBlank() || imageUrl.isNotBlank()
+    
     companion object {
         /**
          * Create HistoryItem from PredictionResult
@@ -88,7 +107,7 @@ data class HistoryItem(
                 symptoms = predictionResult.symptoms,
                 causes = predictionResult.causes,
                 solutions = predictionResult.solutions,
-                imageUrl = predictionResult.imageUrl,
+                imageUrl = "", // Jangan isi dari predictionResult.imageUrl
                 localImageUri = localImageUri,
                 timestamp = Timestamp(predictionResult.timestamp),
                 modelVersion = predictionResult.modelVersion,

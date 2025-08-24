@@ -1,11 +1,13 @@
 package com.example.docmat.domain.model
 
-class News (
-    val id: String,
+data class News(
+    val id: Int,
     val title: String,
-    val content: String,
+    val description: String,
+    val content: String? = null,
+    val url: String? = null,
     val imageUrl: String? = null,
-    val date: String,
-    val author: String? = null
-) {
-}
+    val publishedAt: String? = null,
+    val source: String? = null,
+    val category: String? = null
+)

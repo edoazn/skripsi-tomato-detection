@@ -1,6 +1,7 @@
 package com.example.docmat.di
 
 import com.example.docmat.data.remote.api.TomatoApiService
+import com.example.docmat.data.remote.api.NewsApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,5 +46,11 @@ object NetworkModule {
     @Singleton
     fun provideTomatoApiService(retrofit: Retrofit): TomatoApiService {
         return retrofit.create(TomatoApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNewsApiService(retrofit: Retrofit): NewsApiService {
+        return retrofit.create(NewsApiService::class.java)
     }
 }

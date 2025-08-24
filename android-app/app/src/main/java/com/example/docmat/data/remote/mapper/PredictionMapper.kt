@@ -1,9 +1,7 @@
 package com.example.docmat.data.remote.mapper
 
-import com.example.docmat.data.remote.dto.NewsDto
 import com.example.docmat.data.remote.dto.PredictionResponse
 import com.example.docmat.domain.model.DiseaseType
-import com.example.docmat.domain.model.News
 import com.example.docmat.domain.model.PredictionResult
 
 /**
@@ -37,26 +35,6 @@ fun PredictionResponse.toDomain(): PredictionResult {
     )
 }
 
-/**
- * Convert NewsDto to News domain model
- */
-fun NewsDto.toDomain(): News {
-    return News(
-        id = this.id.toString(),
-        title = this.title,
-        content = this.description, // Using description as content for now
-        imageUrl = this.imageUrl,
-        date = this.publishedAt,
-        author = this.source
-    )
-}
-
-/**
- * Convert list of NewsDto to list of News domain models
- */
-fun List<NewsDto>.toDomain(): List<News> {
-    return this.map { it.toDomain() }
-}
 
 /**
  * Convert PredictionResult to History domain model for storage
