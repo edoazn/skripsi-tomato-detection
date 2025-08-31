@@ -14,7 +14,7 @@ from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, auth
 from fastapi import Query
-from news_service import get_news_data
+from content_service import get_content_with_filters, get_content_by_id, get_content_statistics
 
 
 # Load environment variables dari file .env
@@ -48,8 +48,8 @@ async def lifespan(app: FastAPI):
 
 # --- Inisialisasi Aplikasi FastAPI ---
 app = FastAPI(
-    title="API Deteksi Penyakit & Berita Tomat",
-    description="API untuk menganalisis gambar daun tomat dan menyediakan berita pertanian.",
+    title="API Deteksi Penyakit, Berita & Tips Tomat",
+    description="API untuk menganalisis gambar daun tomat, menyediakan berita pertanian, dan tips budidaya tomat.",
     version="2.0.0",
     lifespan=lifespan,
 )
@@ -129,8 +129,19 @@ UKURAN_INPUT_MODEL = (224, 224)
 
 # Inisialisasi Firebase Admin dengan file service account
 firebase_json = os.getenv("FIREBASE_CREDENTIALS")
-cred = credentials.Certificate(json.loads(firebase_json))
-firebase_admin.initialize_app(cred)
+if firebase_json:
+    try:
+        cred = credentials.Certificate(json.loads(firebase_json))
+        firebase_admin.initialize_app(cred)
+        logger.info("✅ Firebase Admin initialized successfully")
+    except json.JSONDecodeError as e:
+        logger.error(f"❌ Error parsing Firebase credentials: {e}")
+        logger.warning("⚠️ Firebase features will be disabled")
+    except Exception as e:
+        logger.error(f"❌ Error initializing Firebase: {e}")
+        logger.warning("⚠️ Firebase features will be disabled")
+else:
+    logger.warning("⚠️ No Firebase credentials found. Firebase features will be disabled")
 
 
 # Fungsi untuk memverifikasi token
@@ -155,16 +166,14 @@ def preprocess_image(image_bytes: bytes) -> np.ndarray:
     return np.expand_dims(image_array, axis=0)
 
 
-# --- Endpoint Status ---
-@app.get("/")
-def read_root():
-    return {"status": "API Deteksi Penyakit Tomat aktif."}
-
-
 # --- ENDPOINT UTAMA UNTUK PREDIKSI ---
 # Maksimal ukuran file adalah 2MB
 MAX_FILE_SIZE = 2 * 1024 * 1024
 
+# --- Endpoint Status ---
+@app.get("/")
+def read_root():
+    return {"status": "API Deteksi Penyakit Tomat aktif."}
 
 @app.post("/predict")
 async def predict_disease(
@@ -255,62 +264,129 @@ async def predict_disease(
         )
 
 
-# --- ENDPOINT BERITA ---
-# Endpoint untuk mendapatkan daftar berita
-@app.get("/api/news")
-async def get_news_list():
-    all_news = get_news_data()
-    summary_list = [
-        {
-            "id": news["id"],
-            "title": news["title"],
-            "description": news["description"],
-            "imageUrl": news["imageUrl"],
-            "source": news["source"],
-        }
-        for news in all_news
-    ]
-    return {"status": "success", "data": summary_list}
-
-
-# Endpoint untuk mencari berita berdasarkan kata kunci
-@app.get("/api/news/search")
-async def search_news(
-    keyword: str = Query(
-        ..., min_length=3, max_length=100, description="Kata kunci pencarian berita"
-    )
+# --- UNIFIED CONTENT ENDPOINTS ---
+# Endpoint untuk listing/browsing konten dengan filter dasar
+@app.get("/api/content")
+async def get_content_list(
+    type: str = Query(None, description="Filter berdasarkan tipe konten: 'berita' atau 'tip'"),
+    category: str = Query(None, description="Filter berdasarkan kategori")
 ):
-    all_news = get_news_data()
-    filtered_news = [
-        news for news in all_news if keyword.lower() in news["title"].lower()
-    ]
-    if not filtered_news:
-        raise HTTPException(
-            status_code=404,
-            detail="Tidak ada berita yang ditemukan dengan kata kunci tersebut.",
+    """Endpoint untuk browsing/listing konten dengan filter dasar (untuk tab navigation)"""
+    try:
+        # Validasi parameter type jika disediakan
+        if type and type not in ["berita", "tip"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Parameter 'type' harus berupa 'berita' atau 'tip'"
+            )
+        
+        # Ambil konten dengan filter (tanpa search)
+        filtered_content = get_content_with_filters(
+            content_type=type,
+            category=category,
+            search=None  # No search in listing endpoint
         )
-    return {"status": "success", "data": filtered_news}
-
-
-# Endpoint untuk mendapatkan detail berita berdasarkan ID
-@app.get("/api/news/{news_id}")
-async def get_news_detail(news_id: int):
-    all_news = get_news_data()
-    target_news = next((news for news in all_news if news["id"] == news_id), None)
-    if not target_news:
+        
+        return {
+            "status": "success",
+            "data": filtered_content,
+            "total": len(filtered_content),
+            "filters_applied": {
+                "type": type,
+                "category": category
+            }
+        }
+    
+    except Exception as e:
+        logger.error(f"Error getting content list: {e}")
         raise HTTPException(
-            status_code=404, detail="Berita dengan ID tersebut tidak ditemukan."
+            status_code=500,
+            detail=f"Terjadi kesalahan server: {str(e)}"
         )
-    return {"status": "success", "data": target_news}
 
 
-# Endpoint untuk mendapatkan berita terkait berdasarkan id dan kategori
-@app.get("/api/news/{news_id}/related")
-async def related_news(news_id: int):
-    items = get_news_data()
-    target = next((n for n in items if n["id"] == news_id), None)
-    if not target:
-        raise HTTPException(404, "News not found")
-    cat = target.get("category")
-    related = [n for n in items if n["id"] != news_id and n.get("category") == cat]
-    return {"status": "success", "data": related[:5]}
+# Endpoint dedicated untuk search konten dengan keyword
+@app.get("/api/content/search")
+async def search_content(
+    q: str = Query(..., min_length=2, max_length=100, description="Kata kunci pencarian"),
+    type: str = Query(None, description="Filter berdasarkan tipe konten: 'berita' atau 'tip'"),
+    category: str = Query(None, description="Filter berdasarkan kategori")
+):
+    """Endpoint dedicated untuk search konten berdasarkan keyword (untuk search bar)"""
+    try:
+        # Validasi parameter type jika disediakan
+        if type and type not in ["berita", "tip"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Parameter 'type' harus berupa 'berita' atau 'tip'"
+            )
+        
+        # Lakukan search dengan keyword
+        search_results = get_content_with_filters(
+            content_type=type,
+            category=category,
+            search=q
+        )
+        
+        if not search_results:
+            return {
+                "status": "success",
+                "message": f"Tidak ada konten yang ditemukan dengan kata kunci '{q}'",
+                "data": [],
+                "total": 0,
+                "search_query": q
+            }
+        
+        return {
+            "status": "success",
+            "data": search_results,
+            "total": len(search_results),
+            "search_query": q,
+            "filters_applied": {
+                "type": type,
+                "category": category
+            }
+        }
+    
+    except Exception as e:
+        logger.error(f"Error searching content: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Terjadi kesalahan server: {str(e)}"
+        )
+
+
+# Endpoint untuk mendapatkan detail konten berdasarkan ID dan tipe
+@app.get("/api/content/{content_type}/{content_id}")
+async def get_unified_content_detail(content_type: str, content_id: int):
+    """Endpoint untuk mendapatkan detail konten berdasarkan tipe dan ID"""
+    try:
+        # Validasi tipe konten
+        if content_type not in ["berita", "tip"]:
+            raise HTTPException(
+                status_code=400,
+                detail="Parameter 'content_type' harus berupa 'berita' atau 'tip'"
+            )
+        
+        # Ambil detail konten
+        content_detail = get_content_by_id(content_id, content_type)
+        
+        if not content_detail:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Konten {content_type} dengan ID {content_id} tidak ditemukan"
+            )
+        
+        return {
+            "status": "success",
+            "data": content_detail
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting content detail: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Terjadi kesalahan server: {str(e)}"
+        )
