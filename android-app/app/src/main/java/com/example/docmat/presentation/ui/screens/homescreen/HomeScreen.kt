@@ -1,6 +1,5 @@
 package com.example.docmat.presentation.ui.screens.homescreen
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -16,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material3.*
 import androidx.compose.material3.ButtonDefaults.buttonColors
@@ -33,12 +31,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.docmat.utils.GalleryPermissionHelper
 import com.example.docmat.R
 import com.example.docmat.presentation.ui.component.NewsCard
 import com.example.docmat.utils.UCropHelper
 import com.yalantis.ucrop.UCrop
-import android.os.Build
+import com.example.docmat.presentation.ui.component.RecentHistoryCard
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,24 +75,6 @@ fun HomeScreen(
             }
         }
     }
-
-    // Gallery launcher dengan fallback untuk kompatibilitas
-    val galleryLauncher = rememberLauncherForActivityResult(
-        contract = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            ActivityResultContracts.PickVisualMedia()
-        } else {
-            ActivityResultContracts.GetContent()
-        },
-        onResult = { uri ->
-            uri?.let {
-                UCropHelper.startCrop(
-                    context = context,
-                    sourceUri = it,
-                    launcher = uCropLauncher
-                )
-            }
-        }
-    )
 
     // ---- Modern Photo Picker ----
     val pickVisualMedia = rememberLauncherForActivityResult(
@@ -261,9 +240,6 @@ private fun ScanSection(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-//        colors = CardDefaults.cardColors(
-//            colorScheme.primaryContainer.copy(alpha = 0.3f)
-//        )
     ) {
         Column(
             modifier = Modifier
@@ -271,7 +247,7 @@ private fun ScanSection(
                 .padding(20.dp)
         ) {
             Text(
-                text = "Analisa Tomat Anda",
+                text = "Periksa Tomat Anda",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.onSurface,
@@ -279,7 +255,7 @@ private fun ScanSection(
             )
 
             Text(
-                text = "Deteksi penyakit pada daun tomat dengan AI",
+                text = "Cukup foto daun tomat, kami bantu deteksi penyakitnya",
                 fontSize = 14.sp,
                 color = colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -303,7 +279,7 @@ private fun ScanSection(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Mulai Analisa",
+                    text = "Ambil Foto",
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -453,66 +429,6 @@ private fun RecentHistorySection() {
                     result = if (index == 0) "Sehat" else "Bercak Daun",
                     date = "2 jam lalu",
                     isHealthy = index == 0
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun RecentHistoryCard(
-    result: String,
-    date: String,
-    isHealthy: Boolean
-) {
-    Card(
-        modifier = Modifier
-            .width(140.dp)
-            .height(90.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isHealthy)
-                colorScheme.primaryContainer.copy(alpha = 0.3f)
-            else
-                colorScheme.errorContainer.copy(alpha = 0.3f)
-        ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.History,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = if (isHealthy)
-                        colorScheme.primary
-                    else
-                        colorScheme.error
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = if (isHealthy) "✅" else "⚠️",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-
-            Column {
-                Text(
-                    text = result,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
-                )
-                Text(
-                    text = date,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colorScheme.onSurfaceVariant
                 )
             }
         }

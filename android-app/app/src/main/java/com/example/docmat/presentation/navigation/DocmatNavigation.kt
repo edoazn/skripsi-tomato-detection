@@ -39,8 +39,9 @@ import com.example.docmat.presentation.ui.screens.homescreen.HomeViewModel
 import com.example.docmat.presentation.ui.screens.preview.PreviewScreen
 import com.example.docmat.presentation.ui.screens.detail.DetailResultScreen
 import com.example.docmat.presentation.ui.screens.settings.SettingsScreen
-import com.example.docmat.presentation.ui.screens.news.NewsScreen
-import com.example.docmat.presentation.ui.screens.news.NewsDetailScreen
+import com.example.docmat.presentation.ui.screens.content.ContentScreen
+import com.example.docmat.presentation.ui.screens.content.ContentDetailScreen
+import com.example.docmat.domain.model.ContentType
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -60,6 +61,7 @@ fun DocmatNavigation(
         currentRoute?.startsWith("preview/") == true -> false
         currentRoute?.startsWith("detail_result/") == true -> false
         currentRoute?.startsWith("news_detail/") == true -> false
+        currentRoute?.startsWith("content_detail/") == true -> false
         else -> true
     }
 
@@ -165,11 +167,15 @@ fun DocmatNavigation(
                 )
             }
 
-            composable(DocmatScreens.News.route) {
-                NewsScreen(
-                    onNavigateToDetail = { news ->
-                        // Navigate with news ID only
-                        navController.navigate(DocmatScreens.NewsDetail.createRoute(news.id.toString()))
+            composable(DocmatScreens.Content.route) {
+                ContentScreen(
+                    onContentClick = { content ->
+                        navController.navigate(
+                            DocmatScreens.ContentDetail.createRoute(
+                                content.id.toString(),
+                                content.type.value
+                            )
+                        )
                     }
                 )
             }
@@ -310,6 +316,33 @@ fun DocmatNavigation(
             }
 
             composable(
+                route = DocmatScreens.ContentDetail.route,
+                arguments = listOf(
+                    navArgument("contentId") { type = NavType.StringType },
+                    navArgument("contentType") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val contentIdString = backStackEntry.arguments?.getString("contentId")
+                val contentTypeString = backStackEntry.arguments?.getString("contentType")
+                val contentId = contentIdString?.toIntOrNull()
+                val contentType = ContentType.fromString(contentTypeString ?: "")
+
+                if (contentId == null) {
+                    android.util.Log.e("Navigation", "Invalid content ID: $contentIdString")
+                    navController.popBackStack()
+                    return@composable
+                }
+
+                ContentDetailScreen(
+                    contentId = contentId,
+                    contentType = contentType,
+                    onBackClick = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(
                 route = DocmatScreens.NewsDetail.route,
                 arguments = listOf(
                     navArgument("newsId") { type = NavType.StringType }
@@ -348,9 +381,9 @@ private val bottomNavItems = listOf(
         route = DocmatScreens.History.route
     ),
     BottomNavItem(
-        title = "News",
+        title = "Content",
         icon = R.drawable.ic_news,
-        route = DocmatScreens.News.route
+        route = DocmatScreens.Content.route
     ),
     BottomNavItem(
         title = "Settings",
@@ -370,7 +403,8 @@ sealed class DocmatScreens(val route: String) {
     data object Register : DocmatScreens("register")
     data object Home : DocmatScreens("home")
     data object History : DocmatScreens("history")
-    data object News : DocmatScreens("news")
+    data object News : DocmatScreens("news") // Keep for backward compatibility
+    data object Content : DocmatScreens("content") // New unified content screen
     data object Settings : DocmatScreens("settings")
     data object Camera : DocmatScreens("camera")
     data object Preview : DocmatScreens("preview/{imageUri}") {
@@ -384,5 +418,9 @@ sealed class DocmatScreens(val route: String) {
 
     data object NewsDetail : DocmatScreens("news_detail/{newsId}") {
         fun createRoute(newsId: String) = "news_detail/$newsId"
+    }
+
+    data object ContentDetail : DocmatScreens("content_detail/{contentId}/{contentType}") {
+        fun createRoute(contentId: String, contentType: String) = "content_detail/$contentId/$contentType"
     }
 }
